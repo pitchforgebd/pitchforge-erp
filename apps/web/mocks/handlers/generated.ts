@@ -8,6 +8,7 @@ import { accountingRecordHandlers } from './accounting-records.ts';
 import { billingRecordHandlers } from './billing-records.ts';
 import { coreRecordHandlers } from './core-records.ts';
 import { SESSION_COOKIE, coreHandlers } from './core.ts';
+import { projectRecordHandlers } from './project-records.ts';
 
 const handled = new Set(
   [
@@ -15,6 +16,7 @@ const handled = new Set(
     ...coreRecordHandlers,
     ...accountingRecordHandlers,
     ...billingRecordHandlers,
+    ...projectRecordHandlers,
   ].map(({ endpointId }) => endpointId),
 );
 

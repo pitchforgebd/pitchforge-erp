@@ -169,3 +169,31 @@ describe('search', () => {
     expect(body.items.length).toBeLessThan(5);
   });
 });
+
+describe('every mock reply', () => {
+  it('loses the restricted fields of its viewer, even when a handler forgets', async () => {
+    const { mock } = await import('./define.ts');
+    const { projectsEndpoints } = await import('@pitchforge/contracts');
+    // A careless handler that sends a billing rate to anyone.
+    const careless = mock(projectsEndpoints.getProjectTeam, () => ({
+      json: { items: [example('TeamMember')] },
+    }));
+    const local = setupServer(careless.handler);
+    server.close();
+    local.listen({ onUnhandledFrame: 'error' });
+    try {
+      const url = `${API}/api/v1/projects/projects/${rid(2001)}/team`;
+      const pm = (await (await fetch(url, { headers: asRole('pm') })).json()) as {
+        items: Record<string, unknown>[];
+      };
+      const finance = (await (await fetch(url, { headers: asRole('finance') })).json()) as {
+        items: Record<string, unknown>[];
+      };
+      expect(pm.items[0]).not.toHaveProperty('billingRate');
+      expect(finance.items[0]).toHaveProperty('billingRate');
+    } finally {
+      local.close();
+      server.listen({ onUnhandledFrame: 'error' });
+    }
+  });
+});

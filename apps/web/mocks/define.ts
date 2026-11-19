@@ -6,6 +6,8 @@ import type { Endpoint, ErrorCode, ModuleName, Problem } from '@pitchforge/contr
 
 import { pathPattern } from '../lib/api/routes.ts';
 
+import { viewerOf, withoutRestricted } from './restrict.ts';
+
 export type MockReply =
   | { readonly json: unknown; readonly cookies?: readonly string[] }
   | { readonly empty: true; readonly cookies?: readonly string[] }
@@ -41,7 +43,7 @@ export function problemBody(code: ErrorCode): Problem {
   };
 }
 
-function toResponse(endpoint: Endpoint, reply: MockReply): Response {
+function toResponse(endpoint: Endpoint, reply: MockReply, request: MockRequest): Response {
   if ('problem' in reply) {
     return HttpResponse.json(problemBody(reply.problem), {
       status: ERROR_STATUS[reply.problem],
@@ -56,7 +58,11 @@ function toResponse(endpoint: Endpoint, reply: MockReply): Response {
 
   // A mock that drifts from its contract fails here, not in a screen.
   if (endpoint.response === null) throw new Error(`${endpoint.id} has no response body`);
-  const json = endpoint.response.parse(reply.json) as Record<string, unknown>;
+  // Every reply loses the restricted fields its viewer may not read, so no handler can leak one.
+  const viewer = viewerOf(request);
+  const shown =
+    viewer === undefined ? reply.json : withoutRestricted(endpoint.response, reply.json, viewer);
+  const json = endpoint.response.parse(shown) as Record<string, unknown>;
   return HttpResponse.json(json, { status: endpoint.status, headers });
 }
 
@@ -73,12 +79,13 @@ export function mock(
   const method = endpoint.method.toLowerCase() as 'get' | 'post' | 'put' | 'patch' | 'delete';
   // eslint-disable-next-line security/detect-object-injection -- method is one of the five above
   const handler = http[method](pattern, async ({ request }) => {
-    const reply = await resolve({
+    const mockRequest = {
       request,
       cookie: cookieReader(request),
       path: new URL(request.url).pathname,
-    });
-    return toResponse(endpoint, reply);
+    };
+    const reply = await resolve(mockRequest);
+    return toResponse(endpoint, reply, mockRequest);
   });
   return { endpointId: endpoint.id, module: endpoint.module, handler };
 }
