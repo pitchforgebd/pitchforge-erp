@@ -2,13 +2,20 @@ import { setupServer } from 'msw/node';
 import type { SetupServer } from 'msw/node';
 
 import { accountingRecordHandlers } from './handlers/accounting-records.ts';
+import { billingRecordHandlers } from './handlers/billing-records.ts';
 import { coreRecordHandlers } from './handlers/core-records.ts';
 import { coreHandlers } from './handlers/core.ts';
 import { generatedHandlers } from './handlers/generated.ts';
 
 /** Mock handlers except for modules already switched to the real API. */
 export function mockHandlers(realModules: readonly string[]) {
-  return [...coreHandlers, ...coreRecordHandlers, ...accountingRecordHandlers, ...generatedHandlers]
+  return [
+    ...coreHandlers,
+    ...coreRecordHandlers,
+    ...accountingRecordHandlers,
+    ...billingRecordHandlers,
+    ...generatedHandlers,
+  ]
     .filter(({ module }) => !realModules.includes(module))
     .map(({ handler }) => handler);
 }

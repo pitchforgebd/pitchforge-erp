@@ -16,6 +16,7 @@ import { ForbiddenState } from '../common/states.tsx';
 import { AccountsTab, ChequesTab, ClaimsTab, ReconciliationTab } from './bank.tsx';
 import { BillsTab } from './bills.tsx';
 import { AgeingTab, PayeesTab, RunsTab } from './payments.tsx';
+import { TaxTab } from './tax.tsx';
 
 /** The finance figures come from the server's finance dashboard; nothing is summed here. */
 function Figures(): ReactNode {
@@ -66,6 +67,7 @@ export function FinancePage(): ReactNode {
           { value: 'bank', label: t('bankAccounts'), content: <AccountsTab /> },
           { value: 'reconciliation', label: t('reconciliation'), content: <ReconciliationTab /> },
           { value: 'cheques', label: t('cheques'), content: <ChequesTab /> },
+          { value: 'tax', label: t('tax'), content: <TaxTab /> },
         ]}
       />
     </>

@@ -28,9 +28,11 @@ import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Card } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { ErrorState, LoadingState, QueryView } from '../common/states.tsx';
+import { LoadingState, QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
+
+import { AgeingTable } from './party-tables.tsx';
 
 const RUN_TONE: Readonly<Record<PaymentRun['status'], Tone>> = {
   draft: 'neutral',
@@ -465,60 +467,7 @@ export function AgeingTab(): ReactNode {
   return (
     <Card title={t('ageing')} description={t('ageingDescription')}>
       <QueryView query={ageing}>
-        {(data) => (
-          <DataTable
-            label={t('ageing')}
-            rows={[...data.rows, { ...data.totals, partyId: 'total', partyName: t('total') }]}
-            getRowId={(row) => row.partyId}
-            loadingState={null}
-            errorState={<ErrorState error={ageing.error} />}
-            emptyState={null}
-            columns={[
-              {
-                id: 'party',
-                header: t('vendor'),
-                cell: (row) =>
-                  row.partyId === 'total' ? <strong>{row.partyName}</strong> : row.partyName,
-              },
-              {
-                id: 'notDue',
-                header: t('notDue'),
-                align: 'right',
-                cell: (row) => <Money value={row.notDue} />,
-              },
-              {
-                id: 'd30',
-                header: t('days1To30'),
-                align: 'right',
-                cell: (row) => <Money value={row.days1To30} />,
-              },
-              {
-                id: 'd60',
-                header: t('days31To60'),
-                align: 'right',
-                cell: (row) => <Money value={row.days31To60} />,
-              },
-              {
-                id: 'd90',
-                header: t('days61To90'),
-                align: 'right',
-                cell: (row) => <Money value={row.days61To90} />,
-              },
-              {
-                id: 'over',
-                header: t('over90'),
-                align: 'right',
-                cell: (row) => <Money value={row.over90} />,
-              },
-              {
-                id: 'total',
-                header: t('total'),
-                align: 'right',
-                cell: (row) => <Money value={row.total} />,
-              },
-            ]}
-          />
-        )}
+        {(data) => <AgeingTable report={data} partyLabel={t('vendor')} />}
       </QueryView>
     </Card>
   );
