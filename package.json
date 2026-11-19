@@ -17,6 +17,7 @@
     "prepare": "lefthook install",
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "build:cpanel": "node scripts/deploy/build-cpanel.mjs",
     "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",
     "lint": "node --max-old-space-size=6144 node_modules/eslint/bin/eslint.js . --max-warnings=0",
     "lint:security": "node scripts/ci/lint-security.mjs",

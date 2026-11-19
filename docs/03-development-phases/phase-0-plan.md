@@ -24,6 +24,8 @@
 | 0.10 Security baseline   | **Documents drafted** (06 Nov 2026); approval pending | Threat model v1.1, cookie policy, API headers, enforcement tables. Security owner approval and the staging header scan are still needed.                                                                                                                                     |
 | G0 review                | Blocked                                               | Needs the GitHub repository and a green CI run, AWS (Q6), and sign-off from the accountant, security owner and Partners.                                                                                                                                                     |
 
+**Staging (19 Nov 2026):** staging moved from AWS to the company's cPanel shared hosting, mock mode only, on Node 24.19.0 (ADR-0013). The G0 header scan runs there. AWS or a VPS takes over when the backend arrives in Phase 2, and the Terraform stays unapplied until then.
+
 **Changes from the plan at 0.8–0.10:** `modules/secrets` became `modules/secret-store`, because `.gitignore` drops any folder named `secrets`. `example.tfvars` was not written, because the repository denies Claude Code access to `*.tfvars`; the variables are in `variables.tf`. `@nestjs/cli` and `@nestjs/terminus` were dropped, and `@nestjs/throttler` 6.7.1 was added (ADR-0012). Health probes stay at `/api/v1/health` and `/api/v1/ready`, outside the module API, with their shapes in the contracts. The build stage of each image is Debian rather than Alpine (ADR-0012). A `database` job joined the required checks.
 
 ## Decisions

@@ -1,11 +1,11 @@
 # Environments and deployment
 
-| Environment | Purpose                                                                         | Data                          | Deploys               |
-| ----------- | ------------------------------------------------------------------------------- | ----------------------------- | --------------------- |
-| Local       | Development (Docker Compose: PostgreSQL, Valkey, Garage, Mailpit; see ADR-0010) | Seed data                     | Developer             |
-| Preview     | One per pull request, auto-deleted                                              | Seed data                     | CI on PR              |
-| Staging     | Demos, UAT, migration rehearsals, pen test                                      | Anonymised copy of production | CI on merge to `main` |
-| Production  | Live                                                                            | Real                          | Tag + manual approval |
+| Environment | Purpose                                                                                     | Data                          | Deploys               |
+| ----------- | ------------------------------------------------------------------------------------------- | ----------------------------- | --------------------- |
+| Local       | Development (Docker Compose: PostgreSQL, Valkey, Garage, Mailpit; see ADR-0010)             | Seed data                     | Developer             |
+| Preview     | One per pull request, auto-deleted                                                          | Seed data                     | CI on PR              |
+| Staging     | Demos, UAT, migration rehearsals, pen test. On cPanel in mock mode until Phase 2 (ADR-0013) | Anonymised copy of production | CI on merge to `main` |
+| Production  | Live                                                                                        | Real                          | Tag + manual approval |
 
 ## Pipeline
 

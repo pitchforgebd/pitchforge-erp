@@ -6,6 +6,7 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Staging on cPanel** (ADR-0013): `pnpm build:cpanel` packs the mock-mode web app into `dist/cpanel/pitchforge-web.tar.gz`, with one flat `node_modules`, no symlinks and a Passenger start file. Tested on Node 24.19.0. Guide: `docs/05-engineering/cpanel-staging.md`.
 - Project structure, documentation set and clickable prototype (POC v2).
 - Phase 0 plan (`docs/03-development-phases/phase-0-plan.md`): step-by-step plan for 0.1–0.10, pinned tool versions, risks, open questions and the decisions taken on approval.
 - **Phase 0 step 0.1, monorepo:** pnpm 12 workspace with Turborepo; Node 26.13.0 downloaded per project by pnpm (`devEngines.runtime`); placeholder packages `@pitchforge/{web,api,worker,contracts,ui,shared-kernel}`; `@pitchforge/config` with strict TypeScript 6.0 presets (base, node, react, nest), the ESLint 10 flat config, and the Prettier and Vitest presets. Supply-chain settings: 7-day minimum release age, exact versions, install scripts blocked unless listed in `allowBuilds`.
@@ -79,6 +80,9 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Fixed
 
+- `next` and `@next/eslint-plugin-next` 16.4.3 → 16.4.6, for two moderate cache-leak advisories (GHSA-mfr8-8qww-v76h, GHSA-vc7v-qv4w-wrv8). The app does not use `'use cache'` or `unstable_cache`.
+- The web Dockerfile no longer copies `apps/web/public`, which does not exist.
+- The pre-commit ESLint job gets the same memory as `pnpm lint`, so a large commit no longer crashes it.
 - The 100% coverage threshold on the shared kernel had silently stopped applying since step 0.7: a `--project` filter made the coverage patterns match nothing, and a threshold with no files passes. Browser tests now run from their own config, with no filter, and `scripts/ci/check-coverage.mjs` fails if the money code is missing from the report.
 
 - `pnpm lint` ran out of memory on a clean clone: type-aware rules over 8 TypeScript projects need more than the default 2 GB heap, so it now runs with 6 GB.

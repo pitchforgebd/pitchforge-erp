@@ -16,5 +16,6 @@ An ADR records one significant decision, the options considered and the conseque
 | [0010](0010-local-storage-and-cache-images.md)      | Valkey and Garage for local development              | Accepted | 06 Nov 2026 |
 | [0011](0011-static-analysis-with-semgrep.md)        | Static analysis with Semgrep CE                      | Accepted | 06 Nov 2026 |
 | [0012](0012-server-builds-of-workspace-packages.md) | Workspace packages build to `dist` for server images | Accepted | 06 Nov 2026 |
+| [0013](0013-staging-on-cpanel.md)                   | Staging on cPanel shared hosting, mock mode only     | Accepted | 19 Nov 2026 |
 
 New ADR: copy [template.md](template.md) to `NNNN-short-title.md`.

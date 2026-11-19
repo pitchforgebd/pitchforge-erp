@@ -1,5 +1,7 @@
 # Terraform
 
+> Staging runs on cPanel for now ([ADR-0013](../../docs/02-architecture/adr/0013-staging-on-cpanel.md)). This code is for the move to AWS in Phase 2.
+
 Staging on AWS, as code. **Nothing here has been applied.** Applying it creates billed resources, and it needs an AWS account, a region and a domain (Q6 in the Phase 0 plan).
 
 `terraform apply` and `destroy` are human steps, after review. Claude Code sessions are denied them in `.claude/settings.json`.
