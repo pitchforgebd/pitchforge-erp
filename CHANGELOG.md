@@ -8,9 +8,6 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 - **Phase 1 sprint F3.1, projects** in `apps/web`: `/projects` (projects by role, my work, timesheets with submit) and `/projects/[id]` (value, cost, margin, progress and budget alert for those allowed to see money; milestones with sign-off and deadline changes that need a reason; task board with status changes and new tasks; team; budget, P&L and fee agreements). 12 new Playwright tests.
 
-### Security
-
-- Every mock reply now drops the restricted fields its viewer may not read, in `mocks/define.ts`, so a handler cannot leak one by forgetting. A record test found the project team handler sending billing rates to project managers before this change.
 - **Phase 1 sprint F2.2, billing, tax and partners** in `apps/web`: `/billing` (invoices with post and reminder, receipts with AIT, VDS and retention and a new-receipt form, credit notes and write-offs, receivables ageing with client statements), a VAT and withholding tab in `/finance` (VAT return by month, withholding certificates, challans), and `/partners` (balances, withdrawable amount and warnings, statements, drawings submitted after step-up, profit distribution preview and post, equity history). Fixed error states include `INSUFFICIENT_WITHDRAWABLE_BALANCE`. 15 new Playwright tests; axe found one accessible-name mismatch, now fixed.
 - **Phase 1 sprint F2.1, finance and ledger** in `apps/web`: `/finance` (vendor bills with posting preview, new bill, submit; payment runs; payees and payments; payables ageing; expense claims and advances; bank and cash with transfers; reconciliation with match, unmatch and post; cheques) and `/ledger` (journal with reversal by reason; manual journals with a line editor and server-side balance check; chart of accounts; periods with lock, reopen after step-up and the month-end checklist; posting rules, VAT codes, withholding rules, exchange rates). Mocks carry the prototype's accounting records, with every total and reversal written out rather than computed, and fixed error states (`NOT_BALANCED`, `PERIOD_LOCKED`, `ALREADY_REVERSED`). Forms validate with the contract schemas. 17 new Playwright tests.
 - **Phase 1 groundwork and sprints F1.1–F1.2** in `apps/web`:
@@ -74,6 +71,10 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 - ADR-0006: runtime and toolchain baseline.
 - ADR-0007: every approval decision goes through core. Vendor bills and payment runs lost their own `:approve` and `:reject`; six document types now carry `approvalId`.
 - `docs/04-security/evidence/g0-ci-blocks.md`: local proof that a staged secret is blocked.
+
+### Security
+
+- Every mock reply now drops the restricted fields its viewer may not read, in `mocks/define.ts`, so a handler cannot leak one by forgetting. A record test found the project team handler sending billing rates to project managers before this change.
 
 ### Changed
 
