@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F3.2, sales and tenders** in `apps/web`: `/crm` with the pipeline (move by stage, win, lose with a reason), forecast, leads (convert to client), clients (contacts, recent activity, overview), quotations (revisions kept, totals from the server, submit, email, record acceptance), contracts, the tender register (bid checklist per tender, outcome with rank and prices), bank guarantees with release and the standard documents. The sample finance and project-manager users now read sales, as the access-control matrix says; only partners act. 8 new Playwright tests; axe found one accessible-name mismatch, now fixed.
+
 - **Phase 1 sprint F3.1, projects** in `apps/web`: `/projects` (projects by role, my work, timesheets with submit) and `/projects/[id]` (value, cost, margin, progress and budget alert for those allowed to see money; milestones with sign-off and deadline changes that need a reason; task board with status changes and new tasks; team; budget, P&L and fee agreements). 12 new Playwright tests.
 
 - **Phase 1 sprint F2.2, billing, tax and partners** in `apps/web`: `/billing` (invoices with post and reminder, receipts with AIT, VDS and retention and a new-receipt form, credit notes and write-offs, receivables ageing with client statements), a VAT and withholding tab in `/finance` (VAT return by month, withholding certificates, challans), and `/partners` (balances, withdrawable amount and warnings, statements, drawings submitted after step-up, profit distribution preview and post, equity history). Fixed error states include `INSUFFICIENT_WITHDRAWABLE_BALANCE`. 15 new Playwright tests; axe found one accessible-name mismatch, now fixed.

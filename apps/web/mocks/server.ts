@@ -5,6 +5,7 @@ import { accountingRecordHandlers } from './handlers/accounting-records.ts';
 import { billingRecordHandlers } from './handlers/billing-records.ts';
 import { coreRecordHandlers } from './handlers/core-records.ts';
 import { coreHandlers } from './handlers/core.ts';
+import { crmRecordHandlers } from './handlers/crm-records.ts';
 import { generatedHandlers } from './handlers/generated.ts';
 import { projectRecordHandlers } from './handlers/project-records.ts';
 
@@ -16,6 +17,7 @@ export function mockHandlers(realModules: readonly string[]) {
     ...accountingRecordHandlers,
     ...billingRecordHandlers,
     ...projectRecordHandlers,
+    ...crmRecordHandlers,
     ...generatedHandlers,
   ]
     .filter(({ module }) => !realModules.includes(module))

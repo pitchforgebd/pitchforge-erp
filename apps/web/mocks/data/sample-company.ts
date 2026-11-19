@@ -46,6 +46,7 @@ export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
       'finance',
       'ledger',
       'partners',
+      'crm',
       'reports',
       'audit',
     ]),
@@ -54,7 +55,7 @@ export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
     userId: id(3),
     name: 'Nusrat Jahan',
     email: 'nusrat@pitchforge.example',
-    permissions: read(['approvals', 'projects', 'hr']),
+    permissions: read(['approvals', 'projects', 'crm', 'hr']),
   },
   employee: {
     userId: id(4),
