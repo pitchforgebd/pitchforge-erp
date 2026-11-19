@@ -99,7 +99,7 @@ test('navigation follows the session’s permissions', async ({ page }) => {
   await expect(nav.getByRole('link', { name: 'Ledger' })).toHaveCount(0);
 
   await page.goto('/finance');
-  await expect(page.getByText('You do not have access to this page')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'You do not have access to this' })).toBeVisible();
 });
 
 test('a partner sees every section', async ({ page }) => {

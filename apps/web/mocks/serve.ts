@@ -87,10 +87,18 @@ export function withoutRestricted(schema: z.ZodType, value: unknown, viewer: Vie
 }
 
 /** Rows a list can hold: any record, optionally different per viewer. */
-export type Rows = readonly object[] | ((viewer: Viewer) => readonly object[]);
+export type Rows =
+  readonly object[] | ((viewer: Viewer, request: MockRequest) => readonly object[]);
 
-function rowsFor(rows: Rows, viewer: Viewer): readonly Record<string, unknown>[] {
-  return (typeof rows === 'function' ? rows(viewer) : rows) as readonly Record<string, unknown>[];
+function rowsFor(
+  rows: Rows,
+  viewer: Viewer,
+  request: MockRequest,
+): readonly Record<string, unknown>[] {
+  return (typeof rows === 'function' ? rows(viewer, request) : rows) as readonly Record<
+    string,
+    unknown
+  >[];
 }
 
 const PAGING = new Set(['limit', 'cursor', 'sort']);
@@ -151,12 +159,19 @@ export function serveList(endpoint: Endpoint, rows: Rows, options: ListOptions =
   return mock(endpoint, (request) =>
     withViewer(request, (viewer) => {
       const query = new URL(request.request.url).searchParams;
-      const items = rowsFor(rows, viewer)
+      const items = rowsFor(rows, viewer, request)
         .filter((row) => matches(row, query, viewer, options.filters ?? {}))
         .map((row) => withoutRestricted(item, row, viewer));
       return { json: { items, nextCursor: null } };
     }),
   );
+}
+
+const UUID_SEGMENT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** The record id inside a nested path such as /payees/{id}/payments. */
+export function parentIdOf(request: MockRequest): string {
+  return request.path.split('/').find((segment) => UUID_SEGMENT.test(segment)) ?? '';
 }
 
 /** The `{id}` in a request path such as /api/v1/core/approvals/{id} or …/{id}:approve. */
@@ -170,7 +185,7 @@ export function serveOne(endpoint: Endpoint, rows: Rows, key = 'id'): MockHandle
   return mock(endpoint, (request) =>
     withViewer(request, (viewer) => {
       const wanted = idOf(request);
-      const row = rowsFor(rows, viewer).find(
+      const row = rowsFor(rows, viewer, request).find(
         (candidate) => String(new Map(Object.entries(candidate)).get(key)) === wanted,
       );
       if (row === undefined || endpoint.response === null) return { problem: 'NOT_FOUND' };

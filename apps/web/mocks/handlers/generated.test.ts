@@ -34,6 +34,7 @@ const rows = ALL_ENDPOINTS.filter(
       'core.beginTwoFactorEnrolment',
       'core.confirmTwoFactorEnrolment',
       'core.stepUp',
+      'accounting.createManualJournal',
     ].includes(e.id),
 ).map((e) => [e.id, e] as const);
 

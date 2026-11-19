@@ -4,11 +4,14 @@ import { sampleFor } from '@pitchforge/contracts/fixtures';
 import { mock } from '../define.ts';
 import type { MockHandler } from '../define.ts';
 
+import { accountingRecordHandlers } from './accounting-records.ts';
 import { coreRecordHandlers } from './core-records.ts';
 import { SESSION_COOKIE, coreHandlers } from './core.ts';
 
 const handled = new Set(
-  [...coreHandlers, ...coreRecordHandlers].map(({ endpointId }) => endpointId),
+  [...coreHandlers, ...coreRecordHandlers, ...accountingRecordHandlers].map(
+    ({ endpointId }) => endpointId,
+  ),
 );
 
 /**

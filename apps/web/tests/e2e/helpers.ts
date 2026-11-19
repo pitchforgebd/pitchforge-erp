@@ -9,14 +9,16 @@ export const PM = 'nusrat@pitchforge.example';
 
 /** Sign in through the real screens. Mock mode accepts any password for a sample user. */
 export async function signIn(page: Page, email: string): Promise<void> {
+  // Several workers share one server, so the first pages of a test can take a few seconds.
+  const slow = { timeout: 15_000 };
   await page.goto('/login');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill('sample-only');
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page).toHaveURL(/\/two-factor$/);
+  await expect(page).toHaveURL(/\/two-factor$/, slow);
   await page.getByLabel('Authentication code').fill('123456');
   await page.getByRole('button', { name: 'Verify' }).click();
-  await expect(page).toHaveURL(/\/home$/);
+  await expect(page).toHaveURL(/\/home$/, slow);
 }
 
 /** Collect every Content-Security-Policy violation on the page, including silent ones. */

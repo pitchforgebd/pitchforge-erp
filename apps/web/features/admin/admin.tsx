@@ -5,46 +5,14 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { coreEndpoints as core } from '@pitchforge/contracts';
-import type { Endpoint } from '@pitchforge/contracts';
-import { DataTable, DateText, EmptyState, Money, StatusPill, Tabs, Tag } from '@pitchforge/ui';
-import type { DataTableColumn } from '@pitchforge/ui';
+import { DateText, Money, StatusPill, Tabs, Tag } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
-import { ErrorState, LoadingState, QueryView } from '../common/states.tsx';
+import { RecordTable } from '../common/record-table.tsx';
+import { QueryView } from '../common/states.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
-import type { ListState } from '../common/use-list.ts';
-
-function ListTable<Row extends object>({
-  label,
-  list,
-  columns,
-  getRowId,
-}: {
-  readonly label: string;
-  readonly list: Pick<ListState<Endpoint & { list: true }>, 'status' | 'error' | 'refetch'> & {
-    readonly items: readonly Row[];
-  };
-  readonly columns: readonly DataTableColumn<Row>[];
-  readonly getRowId: (row: Row) => string;
-}): ReactNode {
-  const common = useTranslations('common');
-  return (
-    <Card>
-      <DataTable
-        label={label}
-        rows={list.items}
-        getRowId={getRowId}
-        status={list.status}
-        columns={columns}
-        loadingState={<LoadingState />}
-        errorState={<ErrorState error={list.error} onRetry={list.refetch} />}
-        emptyState={<EmptyState title={common('none')} />}
-      />
-    </Card>
-  );
-}
 
 function Users(): ReactNode {
   const t = useTranslations('admin');
@@ -53,7 +21,7 @@ function Users(): ReactNode {
   const roles = useList(core.listRoles, {});
   const roleName = new Map(roles.items.map((role) => [role.id, role.name]));
   return (
-    <ListTable
+    <RecordTable
       label={t('users')}
       list={users}
       getRowId={(row) => row.id}
@@ -122,7 +90,7 @@ function Roles(): ReactNode {
   const kinds = useTranslations('admin.kinds');
   const roles = useList(core.listRoles, {});
   return (
-    <ListTable
+    <RecordTable
       label={t('roles')}
       list={roles}
       getRowId={(row) => row.id}
@@ -186,7 +154,7 @@ function Rules(): ReactNode {
   const roles = useList(core.listRoles, {});
   const roleName = new Map(roles.items.map((role) => [role.id, role.name]));
   return (
-    <ListTable
+    <RecordTable
       label={t('rules')}
       list={rules}
       getRowId={(row) => row.id}
@@ -281,7 +249,7 @@ function OrgUnits(): ReactNode {
   const types = useTranslations('admin.unitTypes');
   const units = useList(core.listOrgUnits, {});
   return (
-    <ListTable
+    <RecordTable
       label={t('orgUnits')}
       list={units}
       getRowId={(row) => row.id}
@@ -298,7 +266,7 @@ function Holidays(): ReactNode {
   const t = useTranslations('admin');
   const holidays = useList(core.listHolidays, {});
   return (
-    <ListTable
+    <RecordTable
       label={t('holidays')}
       list={holidays}
       getRowId={(row) => row.id}
@@ -314,7 +282,7 @@ function Numbering(): ReactNode {
   const t = useTranslations('admin');
   const series = useList(core.listNumberSeries, {});
   return (
-    <ListTable
+    <RecordTable
       label={t('numbering')}
       list={series}
       getRowId={(row) => row.id}
@@ -349,7 +317,7 @@ function Reminders(): ReactNode {
   const t = useTranslations('admin');
   const rules = useList(core.listReminderRules, {});
   return (
-    <ListTable
+    <RecordTable
       label={t('reminders')}
       list={rules}
       getRowId={(row) => row.id}

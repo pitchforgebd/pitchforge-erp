@@ -4,12 +4,13 @@
 
 ## Progress
 
-| Sprint     | State                  | Notes                                                                                                                                                                                |
-| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Groundwork | **Done** (20 Nov 2026) | Record-backed mocks with restricted fields left out by role; shared page header, list paging, loading/empty/error/no-permission states, error messages by code, step-up and commands |
-| F1.1       | **Done** (20 Nov 2026) | Built in Phase 0, plus the error page, idle-session warning, step-up dialog and the account page (devices, password)                                                                 |
-| F1.2       | **Done** (20 Nov 2026) | Home dashboards per role, approvals inbox and review, search, audit log, administration. Partner sign-off pending                                                                    |
-| F2.1–F5    | Not started            |                                                                                                                                                                                      |
+| Sprint     | State                  | Notes                                                                                                                                                                                                                                                                                                          |
+| ---------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Groundwork | **Done** (20 Nov 2026) | Record-backed mocks with restricted fields left out by role; shared page header, list paging, loading/empty/error/no-permission states, error messages by code, step-up and commands                                                                                                                           |
+| F1.1       | **Done** (20 Nov 2026) | Built in Phase 0, plus the error page, idle-session warning, step-up dialog and the account page (devices, password)                                                                                                                                                                                           |
+| F1.2       | **Done** (20 Nov 2026) | Home dashboards per role, approvals inbox and review, search, audit log, administration. Partner sign-off pending                                                                                                                                                                                              |
+| F2.1       | **Done** (20 Nov 2026) | Payables and bank (bills, payment runs, payees, ageing, claims, advances, bank and cash, transfers, reconciliation, cheques) and the ledger (journal and reversal, manual journals, chart of accounts, periods and close checklist, posting rules, VAT, withholding, exchange rates). Partner sign-off pending |
+| F2.2–F5    | Not started            |                                                                                                                                                                                                                                                                                                                |
 
 Started on 20 Nov 2026 while gate G0 is still open (CI proof, sign-offs, staging header scan).
 

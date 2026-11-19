@@ -84,3 +84,17 @@ export function QueryView<T>({
   }
   return children(query.data);
 }
+
+/** The page needs a permission this user does not have. The API refuses its data too. */
+export function ForbiddenState(): ReactNode {
+  const t = useTranslations('states');
+  return (
+    <div className="rounded-card border border-line bg-surface">
+      <EmptyState
+        titleAs="h1"
+        title={t('forbiddenTitle')}
+        description={t('forbiddenDescription')}
+      />
+    </div>
+  );
+}

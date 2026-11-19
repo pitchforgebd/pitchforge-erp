@@ -21,9 +21,8 @@ import { mock } from '../define.ts';
 import type { MockHandler, MockReply, MockRequest } from '../define.ts';
 import { idOf, serveList, serveOne, serveValue, viewerOf } from '../serve.ts';
 import type { Viewer } from '../serve.ts';
+import { STEP_UP_COOKIE } from '../session.ts';
 
-/** Set by a step-up; a sensitive command needs it (security architecture §1). */
-const STEP_UP_COOKIE = '__Host-pf_stepup';
 const STEP_UP_SECONDS = 300;
 const WRONG_CODE = '000000';
 
