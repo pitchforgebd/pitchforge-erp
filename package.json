@@ -15,7 +15,9 @@
   },
   "scripts": {
     "prepare": "lefthook install",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=@pitchforge/web",
+    "dev:api": "turbo run dev --filter=@pitchforge/api",
+    "dev:worker": "turbo run dev --filter=@pitchforge/worker",
     "build": "turbo run build",
     "build:cpanel": "node scripts/deploy/build-cpanel.mjs",
     "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",

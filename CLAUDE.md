@@ -63,8 +63,8 @@ pnpm dev                # web on http://localhost:3000 in mock mode
 pnpm db:migrate         # apply migrations (needs DATABASE_MIGRATE_URL)
 pnpm db:verify          # apply, confirm a second run does nothing, check the schemas
 pnpm db:reset           # local databases only
-pnpm --filter @pitchforge/api dev     # API on http://localhost:4000
-pnpm --filter @pitchforge/worker dev  # worker
+pnpm dev:api            # API on http://localhost:4000 (needs .env: PostgreSQL, Redis)
+pnpm dev:worker         # worker (needs .env: Redis)
 ```
 
 Run one package's tests with `pnpm exec vitest run --project <name>` (e.g. `api`, `config`, `contracts`, `scripts`, `shared-kernel`, `ui`, `web`, `worker`). Commits need gitleaks on PATH (`winget install Gitleaks.Gitleaks`); the pre-commit hook blocks the commit if it is missing.
