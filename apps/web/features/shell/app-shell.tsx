@@ -1,18 +1,23 @@
 'use client';
 
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { Bell, LogOut, Menu } from 'lucide-react';
+import { Bell, LogOut, Menu, Search, UserRound } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
-import type { ReactNode } from 'react';
+import type { SyntheticEvent, ReactNode } from 'react';
 
 import { coreEndpoints as core } from '@pitchforge/contracts';
-import { Button, Dialog, EmptyState, IconButton, cn } from '@pitchforge/ui';
+import type { CurrentSession } from '@pitchforge/contracts';
+import { Button, Dialog, EmptyState, IconButton, Input, cn } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { visibleSections } from '../../lib/navigation.ts';
+import { SessionProvider } from '../common/session.tsx';
+import { StepUpProvider } from '../common/step-up.tsx';
+
+import { IdleWarning } from './idle-warning.tsx';
 
 function NavLinks({
   permissions,
@@ -97,18 +102,53 @@ function NotificationsDialog({
   );
 }
 
+/** Global search (CORE-36): submits to the search page, which asks the API. */
+function SearchBox(): ReactNode {
+  const t = useTranslations('search');
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+  const submit = (event: SyntheticEvent) => {
+    event.preventDefault();
+    const text = query.trim();
+    if (text.length >= 2) router.push(`/search?q=${encodeURIComponent(text)}`);
+  };
+  return (
+    <form
+      role="search"
+      onSubmit={submit}
+      className="relative hidden min-w-0 flex-1 sm:block sm:max-w-sm"
+    >
+      <Search
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted"
+      />
+      <Input
+        type="search"
+        aria-label={t('label')}
+        placeholder={t('placeholder')}
+        className="pl-8"
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+        }}
+      />
+    </form>
+  );
+}
+
 export interface AppShellProps {
-  readonly userName: string;
-  readonly permissions: readonly string[];
+  readonly session: CurrentSession;
   readonly children: ReactNode;
 }
 
-export function AppShell({ userName, permissions, children }: AppShellProps): ReactNode {
+export function AppShell({ session, children }: AppShellProps): ReactNode {
+  const { name: userName, permissions } = session;
   const t = useTranslations('shell');
   const app = useTranslations('app');
   const common = useTranslations('common');
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const router = useRouter();
 
   const logout = useMutation({
     mutationFn: () => browserCall(core.logout, {}),
@@ -137,7 +177,16 @@ export function AppShell({ userName, permissions, children }: AppShellProps): Re
               setMenuOpen(true);
             }}
           />
-          <p className="min-w-0 flex-1 truncate text-sm font-medium">{userName}</p>
+          <SearchBox />
+          <span className="flex-1" />
+          <IconButton
+            className="sm:hidden"
+            label={t('search')}
+            icon={<Search aria-hidden className="size-5" />}
+            onClick={() => {
+              router.push('/search');
+            }}
+          />
           <IconButton
             label={common('notifications')}
             icon={<Bell aria-hidden className="size-5" />}
@@ -145,6 +194,12 @@ export function AppShell({ userName, permissions, children }: AppShellProps): Re
               setNotificationsOpen(true);
             }}
           />
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/account" aria-label={t('account', { name: userName })}>
+              <UserRound aria-hidden className="size-4" />
+              <span className="hidden max-w-40 truncate md:inline">{userName}</span>
+            </Link>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -157,7 +212,11 @@ export function AppShell({ userName, permissions, children }: AppShellProps): Re
             {t('signOut')}
           </Button>
         </header>
-        <main className="p-4 md:p-6">{children}</main>
+        <main className="p-4 md:p-6">
+          <SessionProvider session={session}>
+            <StepUpProvider>{children}</StepUpProvider>
+          </SessionProvider>
+        </main>
       </div>
 
       <Dialog
@@ -177,6 +236,7 @@ export function AppShell({ userName, permissions, children }: AppShellProps): Re
       </Dialog>
 
       <NotificationsDialog open={notificationsOpen} onOpenChange={setNotificationsOpen} />
+      <IdleWarning />
     </div>
   );
 }

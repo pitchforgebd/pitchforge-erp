@@ -4,7 +4,7 @@ You are working on Pitchforge ERP: an internal ERP (sales, tenders, projects, do
 
 ## Current phase
 
-**Phase 0 · Foundation and contracts.** Build tooling, shared kernel, API contracts, design system, web app shell on a mock API, local infrastructure and an API health endpoint. **Do not build backend feature endpoints yet** (they are Phase 2). See `docs/03-development-phases/phase-0-foundation.md`.
+**Phase 1 · Frontend on the mock API.** Every screen is built in `apps/web` against `packages/contracts`, served by the mocks in `apps/web/mocks` with the prototype's fictional data. Gate G0 items (CI proof, sign-offs, staging header scan) are still open and run alongside. **Do not build backend feature endpoints yet** (they are Phase 2). See `docs/03-development-phases/phase-1-frontend.md`.
 
 ## Read before working
 

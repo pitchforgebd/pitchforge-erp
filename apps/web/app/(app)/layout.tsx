@@ -24,9 +24,5 @@ export default async function AppLayout({
   readonly children: ReactNode;
 }): Promise<ReactNode> {
   const session = await currentSession();
-  return (
-    <AppShell userName={session.name} permissions={session.permissions}>
-      {children}
-    </AppShell>
-  );
+  return <AppShell session={session}>{children}</AppShell>;
 }

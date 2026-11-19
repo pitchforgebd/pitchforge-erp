@@ -6,6 +6,11 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 groundwork and sprints F1.1–F1.2** in `apps/web`:
+  - Mocks serve the prototype's fictional records per role (`mocks/serve.ts`, `mocks/data/core-records.ts`), and leave out restricted fields the role may not read, following the access-control matrix. Commands answer with fixed outcomes; approve asks for step-up first.
+  - Shared screen pieces in `features/common`: page header and cards, cursor-paged lists, loading/empty/error/no-permission states, error messages by code, a step-up dialog and a command hook that retries after it.
+  - Screens: home dashboards for partner, finance, project manager and employee; approvals inbox with review, steps, posting preview, approve, reject and return; global search; audit log with filters and the hash-chain state; administration (users, roles, approval rules, company, branches and departments, holidays, document numbers, reminders); account (devices, password); an error page; and a warning five minutes before an idle session ends.
+  - 21 new Playwright tests, including axe and 360 px checks on every new page.
 - **Staging on cPanel** (ADR-0013): `pnpm build:cpanel` packs the mock-mode web app into `dist/cpanel/pitchforge-web.tar.gz`, with one flat `node_modules`, no symlinks and a Passenger start file. Tested on Node 24.19.0. Guide: `docs/05-engineering/cpanel-staging.md`.
 - Project structure, documentation set and clickable prototype (POC v2).
 - Phase 0 plan (`docs/03-development-phases/phase-0-plan.md`): step-by-step plan for 0.1–0.10, pinned tool versions, risks, open questions and the decisions taken on approval.

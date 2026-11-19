@@ -1,22 +1,8 @@
-import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import type { Page } from '@playwright/test';
 
-import { FINANCE, signIn } from './helpers.ts';
+import { FINANCE, axeViolations, hasNoSidewaysScroll, signIn } from './helpers.ts';
 
-const WCAG_AA = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
 const PUBLIC_PAGES = ['/login', '/two-factor', '/reset-password', '/session-expired'];
-
-async function axeViolations(page: Page): Promise<string[]> {
-  const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze();
-  return results.violations.map((violation) => `${violation.id}: ${violation.help}`);
-}
-
-async function hasNoSidewaysScroll(page: Page): Promise<boolean> {
-  return page.evaluate(
-    () => document.documentElement.scrollWidth <= document.documentElement.clientWidth,
-  );
-}
 
 for (const path of PUBLIC_PAGES) {
   test(`${path} passes axe`, async ({ page }) => {
@@ -42,7 +28,7 @@ test('the signed-in shell passes axe, in both themes', async ({ page }) => {
 test('an open notifications panel passes axe', async ({ page }) => {
   await signIn(page, FINANCE);
   await page.getByRole('button', { name: 'Notifications' }).click();
-  await expect(page.getByText('Bill waiting for approval')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Bill waiting for approval')).toBeVisible();
   expect(await axeViolations(page)).toEqual([]);
 });
 

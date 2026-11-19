@@ -6,6 +6,8 @@ const PORT = 3100;
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
+  // One Next.js server answers every worker; more than this makes timing, not code, fail tests.
+  workers: process.env['CI'] === 'true' ? 2 : 3,
   forbidOnly: process.env['CI'] === 'true',
   retries: process.env['CI'] === 'true' ? 1 : 0,
   reporter: [['list']],

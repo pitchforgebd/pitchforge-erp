@@ -1,7 +1,7 @@
 import { setupServer } from 'msw/node';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { ALL_ENDPOINTS } from '@pitchforge/contracts';
+import { ALL_ENDPOINTS, Problem } from '@pitchforge/contracts';
 
 import { mockHandlers } from '../server.ts';
 
@@ -33,6 +33,7 @@ const rows = ALL_ENDPOINTS.filter(
       'core.verifyTwoFactor',
       'core.beginTwoFactorEnrolment',
       'core.confirmTwoFactorEnrolment',
+      'core.stepUp',
     ].includes(e.id),
 ).map((e) => [e.id, e] as const);
 
@@ -46,9 +47,10 @@ describe('every endpoint has a mock', () => {
       method: endpoint.method,
       headers: signedIn,
     });
-    // An approval with a made-up id gets a fixed error, which is contract-valid too.
-    if (endpoint.id === 'core.approve') {
-      expect(response.status).toBe(404);
+    // A record-backed mock answers a made-up id with a problem the contract declares.
+    if (!response.ok) {
+      const problem = Problem.parse(await response.json());
+      expect(endpoint.errors).toContain(problem.code);
       return;
     }
     expect(response.status).toBe(endpoint.status);

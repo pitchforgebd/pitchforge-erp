@@ -1,7 +1,6 @@
 import { coreEndpoints as core } from '@pitchforge/contracts';
 
 import {
-  APPROVAL_ERRORS,
   ENROLMENT_EMAIL,
   LOCKED_EMAIL,
   SAMPLE_NOTIFICATIONS,
@@ -12,9 +11,9 @@ import {
 import type { SampleRole, SampleUser } from '../data/sample-company.ts';
 import { mock } from '../define.ts';
 import type { MockHandler, MockReply, MockRequest } from '../define.ts';
+import { PARTIAL_COOKIE, SESSION_COOKIE } from '../session.ts';
 
-export const SESSION_COOKIE = '__Host-pf_session';
-export const PARTIAL_COOKIE = '__Host-pf_partial';
+export { PARTIAL_COOKIE, SESSION_COOKIE };
 
 const COOKIE_ATTRIBUTES = 'Path=/; HttpOnly; Secure; SameSite=Lax';
 const setCookie = (name: string, value: string) => `${name}=${value}; ${COOKIE_ATTRIBUTES}`;
@@ -105,11 +104,4 @@ export const coreHandlers: readonly MockHandler[] = [
     })),
   ),
   mock(core.markNotificationRead, (request) => requireSession(request, () => ({ empty: true }))),
-  mock(core.approve, (request) =>
-    requireSession(request, () => {
-      const id = request.path.split('/').at(-1)?.split(':')[0] ?? '';
-      const code = Object.entries(APPROVAL_ERRORS).find(([key]) => key === id)?.[1];
-      return { problem: code ?? 'NOT_FOUND' };
-    }),
-  ),
 ];

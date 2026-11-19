@@ -2,6 +2,17 @@
 
 **Weeks 5–20, eight two-week sprints. Goal: every screen of the product works end to end in mock mode on staging and is signed off by the Partners.** The [prototype](../07-prototype/README.md) is the visual and behavioural reference.
 
+## Progress
+
+| Sprint     | State                  | Notes                                                                                                                                                                                |
+| ---------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Groundwork | **Done** (20 Nov 2026) | Record-backed mocks with restricted fields left out by role; shared page header, list paging, loading/empty/error/no-permission states, error messages by code, step-up and commands |
+| F1.1       | **Done** (20 Nov 2026) | Built in Phase 0, plus the error page, idle-session warning, step-up dialog and the account page (devices, password)                                                                 |
+| F1.2       | **Done** (20 Nov 2026) | Home dashboards per role, approvals inbox and review, search, audit log, administration. Partner sign-off pending                                                                    |
+| F2.1–F5    | Not started            |                                                                                                                                                                                      |
+
+Started on 20 Nov 2026 while gate G0 is still open (CI proof, sign-offs, staging header scan).
+
 ## Sprints
 
 | Sprint | Weeks | Scope                                                                                                                                        | Feature IDs              |

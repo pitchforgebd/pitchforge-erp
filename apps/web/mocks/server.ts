@@ -1,12 +1,13 @@
 import { setupServer } from 'msw/node';
 import type { SetupServer } from 'msw/node';
 
+import { coreRecordHandlers } from './handlers/core-records.ts';
 import { coreHandlers } from './handlers/core.ts';
 import { generatedHandlers } from './handlers/generated.ts';
 
 /** Mock handlers except for modules already switched to the real API. */
 export function mockHandlers(realModules: readonly string[]) {
-  return [...coreHandlers, ...generatedHandlers]
+  return [...coreHandlers, ...coreRecordHandlers, ...generatedHandlers]
     .filter(({ module }) => !realModules.includes(module))
     .map(({ handler }) => handler);
 }

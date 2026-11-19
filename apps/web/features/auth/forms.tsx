@@ -20,16 +20,7 @@ import type { VerifyTwoFactorRequest } from '@pitchforge/contracts';
 import { Button, Callout, Field, Input } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
-import { ApiError } from '../../lib/api/client.ts';
-
-/** The translated message for a failed command, by stable error code. */
-function useErrorMessage(): (error: unknown) => string {
-  const t = useTranslations('errors');
-  return (error) => {
-    const code = error instanceof ApiError ? error.code : 'unknown';
-    return t.has(code) ? t(code) : t('unknown');
-  };
-}
+import { useErrorMessage } from '../common/errors.ts';
 
 function FormError({ error }: { readonly error: unknown }): ReactNode {
   const message = useErrorMessage();

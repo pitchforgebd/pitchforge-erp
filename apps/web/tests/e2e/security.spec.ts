@@ -34,7 +34,7 @@ test('the whole journey runs with no CSP violation', async ({ page }) => {
   const violations = await recordCspViolations(page);
   await signIn(page, FINANCE);
   await page.getByRole('button', { name: 'Notifications' }).click();
-  await expect(page.getByText('Bill waiting for approval')).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('Bill waiting for approval')).toBeVisible();
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/login$/);

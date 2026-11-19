@@ -9,7 +9,7 @@ test('a visitor with no session is sent to login', async ({ page }) => {
 
 test('login → 2FA → home', async ({ page }) => {
   await signIn(page, FINANCE);
-  await expect(page.getByRole('heading', { name: 'Welcome, Rafiq Islam' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Finance today' })).toBeVisible();
 });
 
 test('an unknown account gets a message that reveals nothing', async ({ page }) => {

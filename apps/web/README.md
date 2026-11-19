@@ -1,6 +1,6 @@
 # apps/web
 
-Next.js (App Router) user interface and thin backend-for-frontend. **Screens are built in Phase 1 against the mock API.** It holds no database credentials and no business rules.
+Next.js (App Router) user interface and thin backend-for-frontend. **Screens are built in Phase 1 against the mock API; progress is in [phase 1](../../docs/03-development-phases/phase-1-frontend.md#progress).** Mocks serve the prototype's fictional records and leave out restricted fields by role, so each sample user sees what the real API will send them. It holds no database credentials and no business rules.
 
 - Architecture: [frontend architecture](../../docs/02-architecture/frontend-architecture.md), [ADR-0008](../../docs/02-architecture/adr/0008-mock-transport-in-the-bff.md)
 - Security: [headers and CSP](../../docs/04-security/headers-and-csp.md)
