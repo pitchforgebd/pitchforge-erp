@@ -16,7 +16,6 @@ FROM node:26.13.0-alpine3.24@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d64
 WORKDIR /app
 COPY --from=build /repo/apps/web/.next/standalone/ ./
 COPY --from=build /repo/apps/web/.next/static/ ./apps/web/.next/static/
-COPY --from=build /repo/apps/web/public/ ./apps/web/public/
 RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
       /opt/yarn-* /usr/local/bin/yarn /usr/local/bin/yarnpkg /sbin/apk /etc/apk /lib/apk /usr/share/apk \
     && /bin/busybox find /bin /sbin /usr/bin /usr/sbin -type l -exec /bin/busybox rm -f {} + \
