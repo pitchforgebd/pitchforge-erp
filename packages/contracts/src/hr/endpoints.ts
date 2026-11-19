@@ -1,0 +1,247 @@
+import { z } from 'zod';
+
+import { command, createOne, getOne, listOf, updateOne } from '../endpoint-helpers.ts';
+import { IdParams, defineEndpoints } from '../endpoint.ts';
+import { IsoDate, Uuid } from '../shared/primitives.ts';
+
+import {
+  AttendanceRecord,
+  AttendanceRegularisation,
+  CheckIn,
+  CloseAttendanceMonth,
+  CreateEmployee,
+  CreateEmployeeEvent,
+  CreateLeaveRequest,
+  CreateLeaveTypeVersion,
+  CreateRegularisation,
+  CreateShift,
+  Employee,
+  EmployeeEvent,
+  EmployeeStatus,
+  LeaveBalance,
+  LeaveCalendarEntry,
+  LeaveRequest,
+  LeaveRequestStatus,
+  LeaveType,
+  Offboarding,
+  RegularisationStatus,
+  Shift,
+  StartOffboarding,
+  UpdateClearanceItem,
+  UpdateEmployee,
+  UpdateProtectedDetails,
+  UpdateShift,
+} from './schemas.ts';
+
+const HR = '/api/v1/hr';
+
+export const hrEndpoints = defineEndpoints('hr', {
+  /* Employees ----------------------------------------------------------------------------------- */
+  listEmployees: listOf(
+    `${HR}/employees`,
+    'Employees within the caller’s scope; protected fields are omitted without permission',
+    ['HR-01', 'HR-02', 'HR-07'],
+    Employee,
+    {
+      status: EmployeeStatus.optional(),
+      departmentId: Uuid.optional(),
+      q: z.string().max(100).optional(),
+    },
+  ),
+  getEmployee: getOne(
+    `${HR}/employees/{id}`,
+    'One employee',
+    ['HR-01', 'HR-02', 'UX-01'],
+    Employee,
+  ),
+  createEmployee: createOne(
+    `${HR}/employees`,
+    'Add an employee',
+    ['HR-01', 'HR-02'],
+    CreateEmployee,
+    Employee,
+  ),
+  updateEmployee: updateOne(
+    `${HR}/employees/{id}`,
+    'Update job details',
+    ['HR-02'],
+    UpdateEmployee,
+    Employee,
+  ),
+  updateProtectedDetails: {
+    method: 'PUT',
+    path: `${HR}/employees/{id}/protected-details`,
+    summary: 'Change NID, TIN or bank details (step-up); these are encrypted at rest',
+    featureIds: ['HR-01'],
+    params: IdParams,
+    stepUp: true,
+    body: UpdateProtectedDetails,
+    response: Employee,
+  },
+  listEmployeeEvents: getOne(
+    `${HR}/employees/{id}/events`,
+    'Lifecycle events of one employee',
+    ['HR-03'],
+    z.object({ items: z.array(EmployeeEvent) }),
+  ),
+  addEmployeeEvent: {
+    ...createOne(
+      `${HR}/employees/{id}/events`,
+      'Record a lifecycle event',
+      ['HR-03'],
+      CreateEmployeeEvent,
+      EmployeeEvent,
+    ),
+    params: IdParams,
+    versioned: false,
+  },
+  startOffboarding: {
+    ...command(
+      `${HR}/employees/{id}:start-offboarding`,
+      'Start offboarding and the clearance checklist',
+      ['HR-06'],
+      Offboarding,
+    ),
+    body: StartOffboarding,
+  },
+  getOffboarding: getOne(
+    `${HR}/employees/{id}/offboarding`,
+    'Clearance checklist of one leaver',
+    ['HR-06'],
+    Offboarding,
+  ),
+  updateClearanceItem: {
+    method: 'PATCH',
+    path: `${HR}/employees/{id}/offboarding`,
+    summary: 'Tick or untick a clearance item',
+    featureIds: ['HR-06'],
+    params: IdParams,
+    versioned: false,
+    body: UpdateClearanceItem,
+    response: Offboarding,
+  },
+
+  /* Attendance ---------------------------------------------------------------------------------- */
+  listShifts: listOf(
+    `${HR}/shifts`,
+    'Shifts, weekends and lateness rules',
+    ['HR-08', 'HR-11'],
+    Shift,
+  ),
+  createShift: createOne(`${HR}/shifts`, 'Add a shift', ['HR-08', 'HR-11'], CreateShift, Shift),
+  updateShift: updateOne(
+    `${HR}/shifts/{id}`,
+    'Change a shift and its lateness rules',
+    ['HR-08', 'HR-11'],
+    UpdateShift,
+    Shift,
+  ),
+  listAttendance: listOf(`${HR}/attendance-records`, 'Attendance', ['HR-11'], AttendanceRecord, {
+    employeeId: Uuid.optional(),
+    from: IsoDate.optional(),
+    to: IsoDate.optional(),
+  }),
+  checkIn: {
+    method: 'POST',
+    path: `${HR}/attendance-records:check-in`,
+    summary: 'Check in or out from the web or the PWA',
+    featureIds: ['HR-09', 'UX-01'],
+    body: CheckIn,
+    status: 201,
+    response: AttendanceRecord,
+    errors: ['INVALID_STATE'],
+  },
+  listRegularisations: listOf(
+    `${HR}/attendance-regularisations`,
+    'Attendance corrections',
+    ['HR-12'],
+    AttendanceRegularisation,
+    { status: RegularisationStatus.optional(), employeeId: Uuid.optional() },
+  ),
+  createRegularisation: createOne(
+    `${HR}/attendance-regularisations`,
+    'Ask to correct a day',
+    ['HR-12'],
+    CreateRegularisation,
+    AttendanceRegularisation,
+  ),
+  submitRegularisation: command(
+    `${HR}/attendance-regularisations/{id}:submit`,
+    'Send for approval through core approvals',
+    ['HR-12'],
+    AttendanceRegularisation,
+  ),
+  closeAttendanceMonth: {
+    method: 'POST',
+    path: `${HR}/attendance-records:close-month`,
+    summary: 'Close a month; payroll inputs lock from the attendance.month_closed event',
+    featureIds: ['HR-11', 'PAY-02'],
+    stepUp: true,
+    body: CloseAttendanceMonth,
+    response: null,
+    status: 204,
+    errors: ['INVALID_STATE'],
+  },
+
+  /* Leave --------------------------------------------------------------------------------------- */
+  listLeaveTypes: listOf(
+    `${HR}/leave-types`,
+    'Leave types seeded from the Labour Act, with accrual and carry-forward rules',
+    ['HR-14', 'HR-15'],
+    LeaveType,
+  ),
+  createLeaveTypeVersion: createOne(
+    `${HR}/leave-types`,
+    'Add a leave type, or a new effective-dated version of its rules',
+    ['HR-14', 'HR-15'],
+    CreateLeaveTypeVersion,
+    LeaveType,
+  ),
+  listLeaveBalances: listOf(
+    `${HR}/leave-balances`,
+    'Leave balances',
+    ['HR-15', 'HR-16', 'UX-01'],
+    LeaveBalance,
+    { employeeId: Uuid.optional() },
+  ),
+  listLeaveRequests: listOf(
+    `${HR}/leave-requests`,
+    'Leave requests within the caller’s scope',
+    ['HR-16', 'UX-01', 'UX-02'],
+    LeaveRequest,
+    { status: LeaveRequestStatus.optional(), employeeId: Uuid.optional() },
+  ),
+  getLeaveRequest: getOne(
+    `${HR}/leave-requests/{id}`,
+    'One leave request',
+    ['HR-16'],
+    LeaveRequest,
+  ),
+  createLeaveRequest: createOne(
+    `${HR}/leave-requests`,
+    'Draft a leave request',
+    ['HR-16', 'UX-01'],
+    CreateLeaveRequest,
+    LeaveRequest,
+  ),
+  submitLeaveRequest: command(
+    `${HR}/leave-requests/{id}:submit`,
+    'Send for approval through core approvals',
+    ['HR-16', 'UX-01'],
+    LeaveRequest,
+  ),
+  cancelLeaveRequest: command(
+    `${HR}/leave-requests/{id}:cancel`,
+    'Cancel a request',
+    ['HR-16'],
+    LeaveRequest,
+  ),
+  getLeaveCalendar: {
+    method: 'GET',
+    path: `${HR}/leave-calendar`,
+    summary: 'Team leave calendar',
+    featureIds: ['HR-17', 'UX-02'],
+    query: z.strictObject({ from: IsoDate, to: IsoDate, departmentId: Uuid.optional() }),
+    response: z.object({ items: z.array(LeaveCalendarEntry) }),
+  },
+});

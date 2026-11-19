@@ -1,0 +1,39 @@
+{
+  "name": "@pitchforge/api",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NestJS REST API (skeleton in Phase 0 step 0.9; feature endpoints in Phase 2).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsc -p tsconfig.build.json && node --conditions=dist --env-file-if-exists=../../.env dist/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "12.3.2",
+    "@pitchforge/config": "workspace:*",
+    "@types/express": "5.0.6",
+    "@types/pg": "8.23.1",
+    "pino": "10.4.0"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.3.2",
+    "@nestjs/core": "12.3.2",
+    "@nestjs/platform-express": "12.3.2",
+    "@nestjs/throttler": "6.7.1",
+    "@pitchforge/contracts": "workspace:*",
+    "express": "5.3.0",
+    "helmet": "8.3.0",
+    "ioredis": "6.0.0",
+    "nestjs-pino": "5.3.1",
+    "pg": "8.23.1",
+    "pino-http": "11.0.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.7"
+  }
+}

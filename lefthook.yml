@@ -1,0 +1,31 @@
+# Git hooks for developer machines. Installed by `pnpm install` (root "prepare" script).
+# CI sets LEFTHOOK=0 and runs the same checks itself. Changes need security review (CODEOWNERS).
+#
+# Requirements: gitleaks on PATH (Windows: `winget install Gitleaks.Gitleaks`; macOS: `brew install gitleaks`).
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: gitleaks
+      run: node scripts/git/run-gitleaks-staged.mjs
+
+    - name: prettier
+      glob: '*.{ts,tsx,mts,cts,js,jsx,mjs,cjs,json,md,yml,yaml,css}'
+      run: pnpm exec prettier --check {staged_files}
+
+    - name: eslint
+      glob: '*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}'
+      exclude:
+        - 'packages/config/test/fixtures/**'
+        - '.semgrep/**'
+      # Same heap as `pnpm lint`: type-aware rules over many files run out of the default memory.
+      run: node --max-old-space-size=6144 node_modules/eslint/bin/eslint.js --max-warnings=0 --no-warn-ignored {staged_files}
+
+    - name: typecheck
+      glob: '*.{ts,tsx,mts,cts,mjs,cjs}'
+      run: pnpm typecheck
+
+commit-msg:
+  jobs:
+    - name: conventional-commit
+      run: node scripts/git/check-commit-msg.mjs {1}

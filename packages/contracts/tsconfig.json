@@ -1,0 +1,10 @@
+{
+  "extends": "@pitchforge/config/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["node"]
+  },
+  "include": ["src", "fixtures", "scripts", "test", "vitest.config.ts"]
+}

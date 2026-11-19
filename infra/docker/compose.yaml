@@ -1,0 +1,74 @@
+# Local development only. Run from the repository root:
+#   docker compose --env-file .env -f infra/docker/compose.yaml up -d --wait
+# Every port is bound to 127.0.0.1, so nothing here is reachable from the network.
+name: pitchforge
+
+services:
+  postgres:
+    image: postgres:16.15-alpine3.24@sha256:aa6cb33cf4c19c765cefcf48d96176258800870a9a1e930ad126200f9d825139
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set it in .env}
+      APP_DATABASE: pitchforge_dev
+      APP_MIGRATE_PASSWORD: ${APP_MIGRATE_PASSWORD:?Set it in .env}
+      APP_RW_PASSWORD: ${APP_RW_PASSWORD:?Set it in .env}
+      REPORT_RO_PASSWORD: ${REPORT_RO_PASSWORD:?Set it in .env}
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: [CMD, pg_isready, --username=postgres, --dbname=pitchforge_dev]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  cache:
+    image: valkey/valkey:9.0.7-alpine3.24@sha256:2d04268dfa26ab31cfa3fdc538866e76438b2d00e41db41b8cb86d780ac5a416
+    command: [valkey-server, --requirepass, '${VALKEY_PASSWORD:?Set it in .env}', --save, '60 1']
+    environment:
+      REDISCLI_AUTH: ${VALKEY_PASSWORD:?Set it in .env}
+    ports:
+      - 127.0.0.1:6379:6379
+    volumes:
+      - cache-data:/data
+    healthcheck:
+      test: [CMD, valkey-cli, ping]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible storage. It needs one setup step: see infra/docker/README.md.
+  storage:
+    image: dxflrs/garage:v2.5.0@sha256:677e5b758e4425a325b811c425c026bf35a4bf42f7ddbaa773de3f4fd779a5a5
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?Set it in .env}
+    ports:
+      - 127.0.0.1:9000:3900
+    volumes:
+      - ./garage/garage.toml:/etc/garage.toml:ro
+      - storage-meta:/var/lib/garage/meta
+      - storage-data:/var/lib/garage/data
+    healthcheck:
+      test: [CMD, /garage, status]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mail:
+    image: axllent/mailpit:v1.32.0@sha256:0790692be935ea4420d085694f7985b1f692ca6a8771ab0e0bd8ba75ac180498
+    ports:
+      - 127.0.0.1:1025:1025
+      - 127.0.0.1:8025:8025
+    healthcheck:
+      test: [CMD, /mailpit, readyz]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  postgres-data:
+  cache-data:
+  storage-meta:
+  storage-data:

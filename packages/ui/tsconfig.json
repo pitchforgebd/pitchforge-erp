@@ -1,0 +1,16 @@
+{
+  "extends": "@pitchforge/config/tsconfig/react.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false,
+    "types": ["node", "vite/client"]
+  },
+  "include": [
+    "src",
+    ".storybook/*.ts",
+    ".storybook/*.tsx",
+    "vitest.config.ts",
+    "vitest.storybook.config.ts"
+  ]
+}

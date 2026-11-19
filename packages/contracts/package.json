@@ -1,0 +1,36 @@
+{
+  "name": "@pitchforge/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Zod API contracts: the single source of truth for the API.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "dist": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "default": "./src/index.ts"
+    },
+    "./fixtures": "./fixtures/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "openapi": "node scripts/generate-openapi.ts",
+    "diff": "node scripts/diff-openapi.ts",
+    "coverage": "node scripts/feature-coverage.ts"
+  },
+  "devDependencies": {
+    "@asteasolutions/zod-to-openapi": "9.1.0",
+    "@pitchforge/config": "workspace:*"
+  },
+  "dependencies": {
+    "@pitchforge/shared-kernel": "workspace:*",
+    "zod": "4.6.7"
+  }
+}

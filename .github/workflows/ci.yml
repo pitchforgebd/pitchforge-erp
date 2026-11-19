@@ -1,0 +1,183 @@
+# CI pipeline (docs/03-development-phases/phase-0-plan.md, step 0.2).
+# The five job names (quality, contracts, security, database, build) are the required checks on `main`.
+# Actions are pinned to commit SHAs and images to digests; Renovate keeps them current.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  LEFTHOOK: '0' # git hooks are for developer machines, not CI
+  TURBO_TELEMETRY_DISABLED: '1'
+  NEXT_TELEMETRY_DISABLED: '1'
+  GITLEAKS_IMAGE: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+  SEMGREP_IMAGE: semgrep/semgrep:1.182.1@sha256:451b3d875c00dac7ed5db5293e584a07de11449a409c10b3c2d2652f429630b6
+  OASDIFF_IMAGE: tufin/oasdiff:v1.35.0@sha256:82b1840a77335562bb11ce95f77ad31745a0c6f3a770929333ed1c5ef466e400
+  TERRAFORM_IMAGE: hashicorp/terraform:1.13.5@sha256:6bbb82d575aa7bd4f0a2c6e3a0838ab9590426c08a71d7a2783643f01004d356
+
+jobs:
+  quality:
+    name: quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test:coverage
+      - name: Install Chromium for Storybook tests
+        run: pnpm --filter @pitchforge/ui exec playwright install --with-deps chromium
+      - name: Stories render, pass their tests and pass axe (WCAG 2.1 AA)
+        run: pnpm test:storybook
+      - run: pnpm check:boundaries
+
+  contracts:
+    name: contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # contracts:diff compares against the last contracts-v* tag
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm contracts:openapi
+      - name: Generated OpenAPI is committed
+        run: git diff --exit-code packages/contracts/openapi
+      - run: pnpm contracts:coverage
+      - run: pnpm contracts:diff
+
+  security:
+    name: security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # scan the full history, not just the last commit
+      - name: Secret scan (gitleaks, full history)
+        run: >-
+          docker run --rm
+          -v "$GITHUB_WORKSPACE:/repo"
+          -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0='*'
+          "$GITLEAKS_IMAGE"
+          git /repo --config /repo/.gitleaks.toml --redact --no-banner --exit-code 1
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Dependency audit (fail on high or critical)
+        run: pnpm audit --audit-level high
+      - name: Semgrep rule tests
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/src" -w /src "$SEMGREP_IMAGE" semgrep --test .semgrep/rules
+      - name: Static analysis (bare eslint-disable check + Semgrep)
+        run: pnpm lint:security
+
+  database:
+    name: database
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16.15-alpine3.24@sha256:aa6cb33cf4c19c765cefcf48d96176258800870a9a1e930ad126200f9d825139
+        env:
+          POSTGRES_PASSWORD: change-me
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready --username=postgres"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    env:
+      PGPASSWORD: change-me
+      DATABASE_MIGRATE_URL: postgresql://app_migrate:change-me@localhost:5432/pitchforge_test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Create the roles and an empty database
+        run: >-
+          psql --host=localhost --username=postgres --dbname=postgres
+          --set=migrate_password=change-me --set=app_password=change-me
+          --set=report_password=change-me --set=database=pitchforge_test
+          --file=infra/docker/postgres/init/sql/roles.sql
+      - name: Migrations apply, a second run does nothing, and public is closed
+        run: pnpm db:verify
+
+  build:
+    name: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: No mock code, sample data or secrets in the client bundle
+        run: pnpm check:bundle
+      - name: Install Chromium for end-to-end tests
+        run: pnpm --filter @pitchforge/web exec playwright install --with-deps chromium
+      - name: End-to-end tests on the production build
+        run: pnpm test:e2e
+      - name: The local stack becomes healthy
+        run: |
+          cp .env.example .env
+          docker compose --env-file .env -f infra/docker/compose.yaml up --detach --wait
+          docker compose --env-file .env -f infra/docker/compose.yaml down --volumes
+      - name: Build the images
+        run: |
+          docker build --file infra/docker/api.Dockerfile --tag pitchforge/api:ci .
+          docker build --file infra/docker/worker.Dockerfile --tag pitchforge/worker:ci .
+          docker build --file infra/docker/web.Dockerfile --tag pitchforge/web:staging .
+          docker build --file infra/docker/web.Dockerfile --build-arg BUILD_WITHOUT_MOCKS=true --tag pitchforge/web:production .
+      - name: Images are non-root, read-only, with no shell, and production has no mocks
+        run: |
+          node scripts/ci/check-images.mjs pitchforge/api:ci
+          node scripts/ci/check-images.mjs pitchforge/worker:ci
+          node scripts/ci/check-images.mjs pitchforge/web:staging
+          node scripts/ci/check-images.mjs pitchforge/web:production --no-mocks
+      - name: Terraform is formatted and valid
+        run: |
+          docker run --rm -v "$PWD/infra/terraform:/terraform" -w /terraform "$TERRAFORM_IMAGE" fmt -check -recursive
+          docker run --rm -v "$PWD/infra/terraform:/terraform" -w /terraform/envs/staging "$TERRAFORM_IMAGE" init -backend=false -input=false
+          docker run --rm -v "$PWD/infra/terraform:/terraform" -w /terraform/envs/staging "$TERRAFORM_IMAGE" validate

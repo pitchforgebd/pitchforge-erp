@@ -1,0 +1,63 @@
+{
+  "name": "pitchforge-erp",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pitchforge ERP monorepo. Proprietary and confidential.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "packageManager": "pnpm@12.16.1",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "26.13.0",
+      "onFail": "download"
+    }
+  },
+  "scripts": {
+    "prepare": "lefthook install",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck && tsc --noEmit -p tsconfig.json",
+    "lint": "node --max-old-space-size=6144 node_modules/eslint/bin/eslint.js . --max-warnings=0",
+    "lint:security": "node scripts/ci/lint-security.mjs",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage && node scripts/ci/check-coverage.mjs",
+    "test:storybook": "vitest run --root packages/ui --config vitest.storybook.config.ts",
+    "test:e2e": "pnpm --filter @pitchforge/web run test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:boundaries": "depcruise apps packages --config .dependency-cruiser.cjs",
+    "db:migrate": "node --env-file-if-exists=.env scripts/db/migrate.ts",
+    "db:verify": "node --env-file-if-exists=.env scripts/db/verify.ts",
+    "db:reset": "node --env-file-if-exists=.env scripts/db/reset.ts",
+    "check:bundle": "node scripts/ci/scan-bundle.mjs",
+    "contracts:openapi": "pnpm --filter @pitchforge/contracts run openapi",
+    "contracts:diff": "pnpm --filter @pitchforge/contracts run diff",
+    "contracts:coverage": "pnpm --filter @pitchforge/contracts run coverage"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.4.3",
+    "@pitchforge/config": "workspace:*",
+    "@types/node": "26.6.5",
+    "@types/pg": "8.23.1",
+    "@vitest/coverage-v8": "5.0.5",
+    "dependency-cruiser": "18.7.0",
+    "eslint": "10.13.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-import-x": "4.17.1",
+    "eslint-plugin-no-unsanitized": "4.1.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "eslint-plugin-security": "4.2.0",
+    "lefthook": "2.2.2",
+    "node-pg-migrate": "9.0.0",
+    "prettier": "3.9.10",
+    "turbo": "2.11.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@pitchforge/worker",
+  "version": "0.0.0",
+  "private": true,
+  "description": "NestJS workers (skeleton in Phase 0 step 0.9).",
+  "license": "UNLICENSED",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsc -p tsconfig.build.json && node --env-file-if-exists=../../.env dist/main.js",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@pitchforge/config": "workspace:*"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.3.2",
+    "@nestjs/core": "12.3.2",
+    "bullmq": "6.5.0",
+    "ioredis": "6.0.0",
+    "pino": "10.4.0",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "zod": "4.6.7"
+  }
+}

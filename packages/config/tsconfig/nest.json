@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Pitchforge NestJS (apps/api, apps/worker)",
+  "extends": "./node.json",
+  "compilerOptions": {
+    // NestJS dependency injection relies on legacy decorators and emitted metadata,
+    // and on parameter properties, which are not erasable syntax.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "erasableSyntaxOnly": false
+  }
+}

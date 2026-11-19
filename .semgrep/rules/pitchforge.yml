@@ -1,0 +1,56 @@
+# Pitchforge custom Semgrep rules (docs/04-security/secure-coding-checklist.md).
+# Tested by `semgrep --test .semgrep/rules` against pitchforge.ts (ruleid:/ok: annotations).
+rules:
+  - id: pitchforge.no-dangerously-set-inner-html
+    message: >-
+      dangerouslySetInnerHTML is banned. If it is unavoidable, sanitise the HTML and get a
+      security review (secure coding checklist, Input and output).
+    severity: ERROR
+    languages: [generic]
+    paths:
+      include: ['*.ts', '*.tsx', '*.js', '*.jsx', '*.mjs']
+    pattern-regex: \bdangerouslySetInnerHTML\b
+
+  - id: pitchforge.no-browser-storage
+    message: >-
+      No tokens or personal data in browser storage. Sessions are HTTP-only cookies; server
+      state lives in TanStack Query.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: localStorage.$METHOD(...)
+      - pattern: sessionStorage.$METHOD(...)
+      - pattern: window.localStorage.$METHOD(...)
+      - pattern: window.sessionStorage.$METHOD(...)
+
+  - id: pitchforge.no-string-built-sql
+    message: >-
+      SQL must be parameterised. Do not interpolate values into SQL strings; use the query
+      builder or bound parameters ($1, $2 …).
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern: $DB.query(`...${$X}...`, ...)
+      - pattern: $DB.query("..." + $X, ...)
+      - pattern: $DB.query($A + $X, ...)
+      - pattern: $DB.unsafe(...)
+      - pattern: sql.raw(...)
+      - pattern: $DB.$queryRawUnsafe(...)
+      - pattern: $DB.$executeRawUnsafe(...)
+
+  - id: pitchforge.no-secret-in-next-public
+    message: >-
+      NEXT_PUBLIC_* variables are shipped to every browser. Never put secrets, tokens or keys
+      in them (frontend security rule 3).
+    severity: ERROR
+    languages: [generic]
+    pattern-regex: \bNEXT_PUBLIC_[A-Z0-9_]*(SECRET|TOKEN|PASSWORD|PRIVATE|API_KEY|ACCESS_KEY|CREDENTIAL)[A-Z0-9_]*\b
+
+  - id: pitchforge.no-float-money-parse
+    message: >-
+      Money is never parsed as a float. Use Money.parse() from @pitchforge/shared-kernel
+      (integer poisha). Backed up by the ESLint rule pitchforge/no-float-money.
+    severity: ERROR
+    languages: [typescript, javascript]
+    pattern-either:
+      - pattern-regex: parseFloat\([^)]*(amount|Amount|total|Total|balance|Balance|salary|Salary|price|Price|vat|Vat|VAT)[^)]*\)

@@ -1,0 +1,11 @@
+# Security gates by phase
+
+**A phase cannot close while its security gate is open.**
+
+| Phase                  | Gate items                                                                                                                                                                                                                        | Evidence                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| 0 · Foundation         | Secret scanning, dependency audit and static analysis block merges · branch protection · secrets in secret manager · security headers and CSP on staging · threat model v1 · data classification approved                         | CI run showing a blocked secret; header scan report |
+| 1 · Frontend           | No tokens or PII in browser storage · CSP without `unsafe-inline` · no secrets in bundle · restricted fields absent from mock responses for roles without permission · auth flows (2FA, reset, timeout, step-up) built and tested | Playwright security specs; bundle scan              |
+| 2 · Backend, each wave | Policy tests for every role · IDOR tests · SoD tests · idempotency tests · audit trail verified · DAST scan on staging · field encryption verified in DB                                                                          | Test reports; DAST report; DB inspection checklist  |
+| 3 · Go-live            | External pen test (ASVS L2), no open high/critical · DR drill within RTO/RPO · alerts tested end to end · access review of all go-live users · incident response contacts confirmed                                               | Pen test report; drill log; access review sign-off  |
+| Ongoing                | Monthly dependency updates · quarterly access review · yearly pen test and key rotation                                                                                                                                           | Tickets and reports                                 |

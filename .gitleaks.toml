@@ -1,0 +1,57 @@
+# gitleaks configuration: the default rule set plus Pitchforge rules.
+# Runs in the pre-commit hook (lefthook.yml) and on the full history in CI (.github/workflows/ci.yml).
+# Changes to this file need security review (CODEOWNERS).
+
+title = "Pitchforge ERP"
+
+[extend]
+useDefault = true
+
+# Canary used only to prove that the secret scan blocks commits and merges
+# (docs/04-security/evidence/g0-ci-blocks.md). It is not a real credential format.
+[[rules]]
+id = "pitchforge-canary"
+description = "Pitchforge secret-scan canary"
+regex = '''pf_test_canary_[a-z0-9]{32}'''
+keywords = ["pf_test_canary_"]
+
+# Session, encryption and storage secrets written into env-style files or code.
+[[rules]]
+id = "pitchforge-env-secret"
+description = "Non-empty session, encryption or object-storage secret"
+# [ \t]* (not \s*) so an empty `SESSION_SECRET=` never captures the next line.
+# The value stops at a backtick, so `S3_SECRET_KEY=change-me` in a doc reads as "change-me".
+regex = '''(?i)\b(SESSION_SECRET|FIELD_ENCRYPTION_KEY|S3_SECRET_KEY|S3_ACCESS_KEY|DATABASE_PASSWORD)\b[ \t]*[:=][ \t]*['"`]?([^\s'"`#,;=]{8,})'''
+secretGroup = 2
+keywords = ["session_secret", "field_encryption_key", "s3_secret_key", "s3_access_key", "database_password"]
+
+  [[rules.allowlists]]
+  description = "Documented placeholders in .env.example"
+  regexTarget = "secret"
+  regexes = ['''^change-me$''']
+
+# PostgreSQL connection strings with an inline password other than the local placeholder.
+[[rules]]
+id = "pitchforge-postgres-url-password"
+description = "PostgreSQL URL with an inline password"
+regex = '''postgres(?:ql)?://[^:\s/]+:([^@\s]{6,})@'''
+secretGroup = 1
+keywords = ["postgres://", "postgresql://"]
+
+  [[rules.allowlists]]
+  description = "Local-development placeholder password, and <placeholder> text in docs"
+  regexTarget = "secret"
+  regexes = ['''^change-me$''', '''^<[a-z-]+>$''']
+
+[[allowlists]]
+description = "Image names such as valkey/valkey:9.0.7 look like `key: value` to the generic rule"
+targetRules = ["generic-api-key"]
+regexTarget = "match"
+regexes = ['''^valkey:\d+\.\d+''']
+
+[[allowlists]]
+description = "Generated and third-party files"
+paths = [
+  '''(^|/)pnpm-lock\.yaml$''',
+  '''^docs/07-prototype/''',
+]

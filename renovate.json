@@ -1,0 +1,54 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Dependency updates (security architecture §6). Needs the Renovate GitHub App on the repository.",
+  "extends": [
+    "config:recommended",
+    ":pinAllExceptPeerDependencies",
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests",
+    ":semanticCommitTypeAll(chore)"
+  ],
+  "timezone": "Asia/Dhaka",
+  "schedule": ["before 9am on monday"],
+  "minimumReleaseAge": "7 days",
+  "internalChecksFilter": "strict",
+  "prConcurrentLimit": 5,
+  "labels": ["dependencies"],
+  "postUpdateOptions": ["pnpmDedupe"],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on the first day of the month"]
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "minimumReleaseAge": null,
+    "schedule": ["at any time"]
+  },
+  "packageRules": [
+    {
+      "description": "Major updates wait for approval on the dependency dashboard",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "groupName": "eslint",
+      "matchPackageNames": [
+        "eslint",
+        "@eslint/**",
+        "eslint-*",
+        "typescript-eslint",
+        "@typescript-eslint/**"
+      ]
+    },
+    { "groupName": "vitest", "matchPackageNames": ["vitest", "@vitest/**"] },
+    { "groupName": "nestjs", "matchPackageNames": ["@nestjs/**"] },
+    { "groupName": "storybook", "matchPackageNames": ["storybook", "@storybook/**"] },
+    { "groupName": "tanstack", "matchPackageNames": ["@tanstack/**"] },
+    { "groupName": "github-actions", "matchManagers": ["github-actions"] },
+    {
+      "description": "The runtime is pinned in three places; update them together",
+      "groupName": "node runtime",
+      "matchDepNames": ["node"]
+    }
+  ]
+}

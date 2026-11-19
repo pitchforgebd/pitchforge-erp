@@ -1,0 +1,11 @@
+pnpm-lock.yaml
+**/dist/
+**/.next/
+**/.turbo/
+**/coverage/
+**/storybook-static/
+docs/07-prototype/
+packages/config/test/fixtures/
+packages/contracts/openapi/
+apps/web/.next/
+apps/web/test-results/

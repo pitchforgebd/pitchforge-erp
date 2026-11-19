@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": [
+    "eslint/**/*.mjs",
+    "eslint/**/*.d.ts",
+    "dependency-cruiser/**/*.cjs",
+    "prettier/**/*.mjs",
+    "vitest/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["test/fixtures/**"]
+}

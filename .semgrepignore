@@ -1,0 +1,9 @@
+# Paths Semgrep does not scan (rule tests are run separately with `semgrep --test`).
+node_modules/
+**/dist/
+**/.next/
+**/coverage/
+.turbo/
+.semgrep/
+docs/07-prototype/
+packages/config/test/fixtures/

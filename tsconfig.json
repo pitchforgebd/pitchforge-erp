@@ -1,0 +1,15 @@
+{
+  "extends": "./packages/config/tsconfig/node.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": [
+    "*.ts",
+    "*.mjs",
+    "scripts/**/*.ts",
+    "scripts/**/*.mjs",
+    "packages/config/eslint/vendor.d.ts"
+  ]
+}

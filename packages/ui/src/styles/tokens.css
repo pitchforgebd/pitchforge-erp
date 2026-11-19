@@ -1,0 +1,111 @@
+/*
+ * Design tokens, taken from the prototype (docs/07-prototype). Components use these through
+ * Tailwind classes (bg-surface, text-muted …); no one-off colours or spacing elsewhere.
+ * One change from the prototype: --faint (#86948f light, #6f807c dark) failed WCAG AA, so it
+ * moved to the nearest values that pass on every surface. ui.test.tsx checks the contrast.
+ * Dark values appear twice: once for the OS preference, once for an explicit choice. A test
+ * keeps the two blocks identical.
+ *
+ * `data-theme` works on any element, so a story can show both themes side by side.
+ */
+:root,
+[data-theme='light'] {
+  --bg: #f3f5f3;
+  --surface: #ffffff;
+  --surface-2: #ecf0ee;
+  --line: #dce2df;
+  --line-strong: #c6cfcb;
+  --fg: #15211f;
+  --muted: #5a6865;
+  --faint: #646f6b;
+  --accent: #0b6e66;
+  --accent-ink: #ffffff;
+  --accent-soft: #dceeeb;
+  --rail: #0f1f1d;
+  --rail-2: #162b28;
+  --rail-fg: #d3e0dd;
+  --rail-muted: #7f9893;
+  --rail-active: #1e3d39;
+  --rail-head: #ffffff;
+  --good: #1d7a45;
+  --good-soft: #e0f1e6;
+  --warn: #9a5a00;
+  --warn-soft: #fbebd2;
+  --crit: #b3261e;
+  --crit-soft: #fbe2df;
+  --info: #235aa6;
+  --info-soft: #e2ebf8;
+  --chart-a: #0b6e66;
+  --chart-b: #b9c6c2;
+  --shadow: 0 1px 2px rgba(16, 32, 30, 0.06), 0 8px 24px rgba(16, 32, 30, 0.08);
+  --scrim: rgba(10, 20, 18, 0.45);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0e1413;
+    --surface: #151d1c;
+    --surface-2: #1b2624;
+    --line: #263331;
+    --line-strong: #33433f;
+    --fg: #e2ebe8;
+    --muted: #97a7a3;
+    --faint: #7b8e8a;
+    --accent: #3db5a8;
+    --accent-ink: #04211e;
+    --accent-soft: #133935;
+    --rail: #0a100f;
+    --rail-2: #111b19;
+    --rail-fg: #cfdcd9;
+    --rail-muted: #71877f;
+    --rail-active: #173430;
+    --rail-head: #ffffff;
+    --good: #4cc37e;
+    --good-soft: #123020;
+    --warn: #e4a24d;
+    --warn-soft: #33240f;
+    --crit: #f0766a;
+    --crit-soft: #3a1714;
+    --info: #81aaf0;
+    --info-soft: #172541;
+    --chart-a: #3db5a8;
+    --chart-b: #3a4a47;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+    --scrim: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+
+[data-theme='dark'] {
+  --bg: #0e1413;
+  --surface: #151d1c;
+  --surface-2: #1b2624;
+  --line: #263331;
+  --line-strong: #33433f;
+  --fg: #e2ebe8;
+  --muted: #97a7a3;
+  --faint: #7b8e8a;
+  --accent: #3db5a8;
+  --accent-ink: #04211e;
+  --accent-soft: #133935;
+  --rail: #0a100f;
+  --rail-2: #111b19;
+  --rail-fg: #cfdcd9;
+  --rail-muted: #71877f;
+  --rail-active: #173430;
+  --rail-head: #ffffff;
+  --good: #4cc37e;
+  --good-soft: #123020;
+  --warn: #e4a24d;
+  --warn-soft: #33240f;
+  --crit: #f0766a;
+  --crit-soft: #3a1714;
+  --info: #81aaf0;
+  --info-soft: #172541;
+  --chart-a: #3db5a8;
+  --chart-b: #3a4a47;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.35);
+  --scrim: rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}

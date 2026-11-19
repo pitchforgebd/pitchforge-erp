@@ -1,0 +1,112 @@
+{
+  "app": {
+    "name": "Pitchforge ERP",
+    "brand": "Pitchforge",
+    "tagline": "One system for sales, projects and the books."
+  },
+  "common": {
+    "close": "Close",
+    "continue": "Continue",
+    "retry": "Try again",
+    "required": "required",
+    "notifications": "Notifications"
+  },
+  "errors": {
+    "ACCOUNT_LOCKED": "This account is locked after too many attempts. Ask an administrator to unlock it.",
+    "FORBIDDEN": "You do not have permission to do this.",
+    "INVALID_CREDENTIALS": "That email and password do not match.",
+    "INVALID_TWO_FACTOR_CODE": "That code is not valid. Check your authenticator app and try again.",
+    "PERIOD_LOCKED": "This period is locked. Ask a Partner to reopen it.",
+    "RATE_LIMITED": "Too many attempts. Wait a moment and try again.",
+    "SOD_VIOLATION": "You cannot approve your own request.",
+    "STALE_VERSION": "Someone else changed this record. Reload it and try again.",
+    "UNAUTHENTICATED": "Your session has ended. Sign in again.",
+    "unknown": "Something went wrong. Try again."
+  },
+  "login": {
+    "title": "Sign in",
+    "email": "Email",
+    "emailInvalid": "Enter a valid email address.",
+    "password": "Password",
+    "passwordRequired": "Enter your password.",
+    "submit": "Sign in",
+    "forgot": "Forgot your password?"
+  },
+  "twoFactor": {
+    "title": "Two-factor sign-in",
+    "description": "Enter the 6-digit code from your authenticator app.",
+    "code": "Authentication code",
+    "codeInvalid": "A code has 6 digits.",
+    "submit": "Verify",
+    "backToLogin": "Back to sign in"
+  },
+  "enrol": {
+    "title": "Set up two-factor sign-in",
+    "description": "Your role needs a second step at sign-in. Add this key to your authenticator app, then enter the code it shows.",
+    "key": "Setup key",
+    "loading": "Preparing your setup key…",
+    "code": "Authentication code",
+    "codeInvalid": "A code has 6 digits.",
+    "submit": "Confirm",
+    "recoveryTitle": "Save your recovery codes",
+    "recoveryDescription": "Each code works once, if you lose your phone. They will not be shown again.",
+    "done": "I have saved them"
+  },
+  "reset": {
+    "title": "Reset your password",
+    "description": "Enter your email and we will send a link that works for 30 minutes.",
+    "email": "Email",
+    "emailInvalid": "Enter a valid email address.",
+    "submit": "Send the link",
+    "sentTitle": "Check your email",
+    "sentDescription": "If that address has an account, a reset link is on its way.",
+    "backToLogin": "Back to sign in"
+  },
+  "sessionExpired": {
+    "title": "Your session has ended",
+    "description": "For your security, you are signed out after 60 minutes without activity.",
+    "signIn": "Sign in again"
+  },
+  "shell": {
+    "mainNavigation": "Main navigation",
+    "openMenu": "Open menu",
+    "menu": "Menu",
+    "signOut": "Sign out",
+    "unread": "{count, plural, =0 {No unread notifications} one {# unread notification} other {# unread notifications}}"
+  },
+  "nav": {
+    "home": "Home",
+    "approvals": "Approvals",
+    "billing": "Billing",
+    "finance": "Finance",
+    "ledger": "Ledger",
+    "partners": "Partners",
+    "projects": "Projects",
+    "crm": "Sales",
+    "hr": "People",
+    "procurement": "Procurement",
+    "reports": "Reports",
+    "audit": "Audit log",
+    "admin": "Administration"
+  },
+  "home": {
+    "greeting": "Welcome, {name}",
+    "placeholderTitle": "Your dashboard arrives in Phase 1",
+    "placeholderDescription": "This shell proves sign-in, navigation and security on the mock API."
+  },
+  "section": {
+    "placeholderTitle": "{section} arrives in Phase 1",
+    "placeholderDescription": "Screens are built against the contracts in packages/contracts.",
+    "forbiddenTitle": "You do not have access to this page",
+    "forbiddenDescription": "Ask an administrator if you need it."
+  },
+  "notifications": {
+    "loading": "Loading notifications…",
+    "emptyTitle": "You are all caught up",
+    "errorTitle": "Could not load notifications"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "home": "Go to home"
+  }
+}

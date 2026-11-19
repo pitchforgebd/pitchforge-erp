@@ -1,0 +1,29 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply chain (docs/04-security/security-architecture.md §6, ADR-0006).
+# Only resolve versions that have been public for at least 7 days (minutes).
+minimumReleaseAge: 10080
+# Exact versions only; no ^ or ~ ranges are written by `pnpm add`.
+savePrefix: ''
+# Fail instead of warn when a package's engines do not match.
+engineStrict: true
+# Dependency install scripts are blocked unless listed here as true. This is a security file:
+# every entry needs a reason and a code-owner review.
+allowBuilds:
+  # Its install script only builds from source when no prebuilt binary exists; next-intl's
+  # extractor brings the prebuilt one as an optional package. Same for @swc/core's postinstall.
+  '@parcel/watcher': false
+  '@swc/core': false
+  # Its postinstall only speeds up start-up; the binary is an optional package (@esbuild/<os>-<arch>).
+  esbuild: false
+  # Its postinstall only runs `lefthook install`; the root "prepare" script does that instead.
+  # The binary arrives as an optional platform package (lefthook-<os>-<arch>).
+  lefthook: false
+  # bullmq's msgpackr can use it for speed. Its install script only builds from source; the
+  # prebuilt binary arrives as an optional package, and msgpackr falls back to plain JavaScript.
+  msgpackr-extract: false
+  # Its postinstall only downloads a native binding as a fallback; the binding already
+  # arrives as an optional platform package (@unrs/resolver-binding-*).
+  unrs-resolver: false

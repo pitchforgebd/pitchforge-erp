@@ -1,0 +1,22 @@
+# Keeps secrets, local state and bulk out of the build context.
+.git
+.github
+.claude
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+**/*.p12
+**/*.tfvars
+**/*.tfstate*
+**/secrets
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/coverage
+**/playwright-report
+**/test-results
+docs
+infra/terraform

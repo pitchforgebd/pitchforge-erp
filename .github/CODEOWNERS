@@ -1,0 +1,45 @@
+# Code owners. The last matching line wins, so general rules come first.
+# Paths that move money, touch personal data, or change security or the guard rails need a
+# code-owner review. NOTE: GitHub accepts ONE approval from any team listed on a line; the
+# two-reviewer rule is enforced by the `main` ruleset requiring 2 approvals
+# (docs/04-security/branch-protection.md).
+
+*                                   @pitchforge/engineering
+
+# API contracts: tech lead + backend (git-workflow: two reviewers for contracts)
+/packages/contracts/                @pitchforge/tech-lead @pitchforge/backend
+
+# Money, IDs, dates, document numbers
+/packages/shared-kernel/            @pitchforge/tech-lead @pitchforge/finance-reviewer
+
+# Modules that move money or hold personal data (module template: src/modules/<name>/)
+/apps/api/src/modules/accounting/   @pitchforge/tech-lead @pitchforge/finance-reviewer
+/apps/api/src/modules/payroll/      @pitchforge/tech-lead @pitchforge/finance-reviewer
+/apps/api/src/modules/partners/     @pitchforge/tech-lead @pitchforge/finance-reviewer
+/apps/api/src/modules/hr/           @pitchforge/tech-lead @pitchforge/security
+/apps/api/src/modules/core/         @pitchforge/tech-lead @pitchforge/security
+/apps/worker/src/modules/           @pitchforge/tech-lead
+
+# Database and infrastructure
+/db/migrations/                     @pitchforge/tech-lead
+/infra/                             @pitchforge/tech-lead @pitchforge/security
+
+# Guard rails: CI, hooks, scanners, lint and boundary rules, install-script allowlist, Claude Code
+/.github/                           @pitchforge/tech-lead @pitchforge/security
+/.claude/                           @pitchforge/tech-lead @pitchforge/security
+/CLAUDE.md                          @pitchforge/tech-lead
+/packages/config/                   @pitchforge/tech-lead @pitchforge/security
+/scripts/ci/                        @pitchforge/tech-lead @pitchforge/security
+/scripts/git/                       @pitchforge/tech-lead @pitchforge/security
+/.gitleaks.toml                     @pitchforge/security
+/.semgrep/                          @pitchforge/security
+/.semgrepignore                     @pitchforge/security
+/.dependency-cruiser.cjs            @pitchforge/tech-lead
+/eslint.config.mjs                  @pitchforge/tech-lead
+/lefthook.yml                       @pitchforge/tech-lead @pitchforge/security
+/pnpm-workspace.yaml                @pitchforge/tech-lead @pitchforge/security
+/renovate.json                      @pitchforge/tech-lead @pitchforge/security
+
+# Security documentation
+/docs/04-security/                  @pitchforge/security
+/SECURITY.md                        @pitchforge/security
