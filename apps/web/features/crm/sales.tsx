@@ -34,6 +34,22 @@ import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  AddContactButton,
+  EditClientButton,
+  EditContractButton,
+  EditDealButton,
+  EditLeadButton,
+  EditQuotationButton,
+  EditStagesButton,
+  LogActivityButton,
+  NewClientButton,
+  NewContractButton,
+  NewDealButton,
+  NewLeadButton,
+  NewQuotationButton,
+} from './forms.tsx';
+
 function LoseDialog({
   deal,
   onClose,
@@ -146,6 +162,10 @@ export function PipelineTab(): ReactNode {
   return (
     <div className="flex flex-col gap-3">
       {error !== null && <Callout tone="crit" title={message(error)} />}
+      <div className="flex flex-wrap justify-end gap-2">
+        <EditStagesButton />
+        <NewDealButton />
+      </div>
       <QueryView query={stages}>
         {(data) => (
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -212,6 +232,7 @@ export function PipelineTab(): ReactNode {
                               >
                                 {t('lose')}
                               </Button>
+                              <EditDealButton deal={deal} />
                             </span>
                           </div>
                         )}
@@ -308,6 +329,11 @@ export function LeadsTab(): ReactNode {
         label={t('leads')}
         list={leads}
         getRowId={(row) => row.id}
+        toolbar={
+          <div className="flex justify-end">
+            <NewLeadButton />
+          </div>
+        }
         columns={[
           {
             id: 'name',
@@ -340,19 +366,23 @@ export function LeadsTab(): ReactNode {
             id: 'actions',
             header: '',
             align: 'right',
-            cell: (row) =>
-              row.allowedActions.includes('convert') ? (
-                <Button
-                  size="sm"
-                  loading={convert.isPending}
-                  aria-label={t('convertLabel', { name: row.name })}
-                  onClick={() => {
-                    convert.mutate(row);
-                  }}
-                >
-                  {t('convert')}
-                </Button>
-              ) : null,
+            cell: (row) => (
+              <span className="flex justify-end gap-2">
+                <EditLeadButton lead={row} />
+                {row.allowedActions.includes('convert') && (
+                  <Button
+                    size="sm"
+                    loading={convert.isPending}
+                    aria-label={t('convertLabel', { name: row.name })}
+                    onClick={() => {
+                      convert.mutate(row);
+                    }}
+                  >
+                    {t('convert')}
+                  </Button>
+                )}
+              </span>
+            ),
           },
         ]}
       />
@@ -386,6 +416,11 @@ function ClientDialog({
       <QueryView query={overview}>
         {(data) => (
           <div className="flex flex-col gap-4">
+            <span className="flex flex-wrap gap-2">
+              <EditClientButton client={data.client} />
+              <AddContactButton client={data.client} />
+              <LogActivityButton client={data.client} />
+            </span>
             <div className="grid grid-cols-2 gap-3">
               <KpiTile label={t('openPipeline')} value={<Money value={data.openPipelineValue} />} />
               <KpiTile label={t('receivable')} value={<Money value={data.receivableBalance} />} />
@@ -442,6 +477,11 @@ export function ClientsTab(): ReactNode {
         label={t('clients')}
         list={clients}
         getRowId={(row) => row.id}
+        toolbar={
+          <div className="flex justify-end">
+            <NewClientButton />
+          </div>
+        }
         columns={[
           {
             id: 'name',
@@ -536,6 +576,7 @@ function QuotationDialog({
       closeLabel={common('close')}
       footer={
         <>
+          <EditQuotationButton quote={quote} />
           {can('new_version') && (
             <Button
               variant="secondary"
@@ -638,7 +679,14 @@ export function QuotationsTab(): ReactNode {
         label={t('quotations')}
         list={quotes}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('quotationsHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('quotationsHint')}</p>
+            <span className="flex flex-wrap gap-2">
+              <NewQuotationButton />
+            </span>
+          </div>
+        }
         columns={[
           {
             id: 'number',
@@ -694,7 +742,14 @@ export function ContractsTab(): ReactNode {
       label={t('contracts')}
       list={contracts}
       getRowId={(row) => row.id}
-      toolbar={<p className="text-xs text-muted">{t('contractsHint')}</p>}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted">{t('contractsHint')}</p>
+          <span className="flex flex-wrap gap-2">
+            <NewContractButton />
+          </span>
+        </div>
+      }
       columns={[
         { id: 'number', header: t('contract'), cell: (row) => <Tag>{row.number ?? '—'}</Tag> },
         { id: 'client', header: t('client'), cell: (row) => row.clientName },
@@ -725,6 +780,12 @@ export function ContractsTab(): ReactNode {
           id: 'renewal',
           header: t('renewal'),
           cell: (row) => (row.renewalDate === null ? '—' : <DateText value={row.renewalDate} />),
+        },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditContractButton contract={row} />,
         },
       ]}
     />

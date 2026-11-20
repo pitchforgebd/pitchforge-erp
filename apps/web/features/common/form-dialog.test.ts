@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { bodyOf } from './form-dialog.tsx';
+import { bodyOf, dhakaInput } from './form-dialog.tsx';
 import type { FormSpec } from './form-dialog.tsx';
 
 const specs: readonly FormSpec[] = [
@@ -63,5 +63,24 @@ describe('the form body', () => {
       new Map([['amount', 'ten']]),
     );
     expect(body).toEqual({ amount: { amount: 'ten', currency: 'BDT' } });
+  });
+});
+
+describe('date and time fields', () => {
+  it('sends a Dhaka time as UTC, and shows UTC back as Dhaka time', () => {
+    const fields: readonly FormSpec[] = [
+      { name: 'deadline', label: 'Deadline', kind: 'datetime' },
+      { name: 'id', label: 'Id', kind: 'hidden', nullable: true },
+    ];
+    const body = bodyOf(
+      fields,
+      new Map([
+        ['deadline', '2026-12-01T11:00'],
+        ['id', ''],
+      ]),
+    );
+    expect(body).toEqual({ deadline: '2026-12-01T05:00:00.000Z', id: null });
+    expect(dhakaInput('2026-12-01T05:00:00Z')).toBe('2026-12-01T11:00');
+    expect(dhakaInput(null)).toBe('');
   });
 });

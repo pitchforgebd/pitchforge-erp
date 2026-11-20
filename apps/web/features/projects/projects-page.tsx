@@ -26,22 +26,33 @@ import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
+import { useSession } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { EditTimesheetButton, NewProjectButton, NewTimesheetButton } from './forms.tsx';
 import { MilestoneStatusPill, TaskStatusPill } from './status.tsx';
 
 function ProjectList(): ReactNode {
   const t = useTranslations('projects');
   const types = useTranslations('projects.types');
   const list = useList(projects.listProjects, {});
+  // Only partners open projects.
+  const session = useSession();
   return (
     <RecordTable
       label={t('projects')}
       list={list}
       getRowId={(row) => row.id}
       empty={t('noProjects')}
+      {...(session.permissions.includes('admin.read') && {
+        toolbar: (
+          <div className="flex justify-end">
+            <NewProjectButton />
+          </div>
+        ),
+      })}
       columns={[
         {
           id: 'project',
@@ -173,16 +184,19 @@ function TimesheetDialog({
       title={t('weekOf', { name: sheet.employee.name })}
       closeLabel={common('close')}
       footer={
-        sheet.allowedActions.includes('submit') ? (
-          <Button
-            loading={submit.isPending}
-            onClick={() => {
-              submit.mutate(undefined);
-            }}
-          >
-            {t('submitForApproval')}
-          </Button>
-        ) : undefined
+        <>
+          <EditTimesheetButton sheet={sheet} />
+          {sheet.allowedActions.includes('submit') && (
+            <Button
+              loading={submit.isPending}
+              onClick={() => {
+                submit.mutate(undefined);
+              }}
+            >
+              {t('submitForApproval')}
+            </Button>
+          )}
+        </>
       }
     >
       <div className="flex flex-col gap-4">
@@ -235,7 +249,12 @@ function Timesheets(): ReactNode {
         label={t('timesheets')}
         list={sheets}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('timesheetsHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('timesheetsHint')}</p>
+            <NewTimesheetButton />
+          </div>
+        }
         columns={[
           {
             id: 'employee',

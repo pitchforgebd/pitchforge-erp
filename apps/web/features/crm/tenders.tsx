@@ -30,6 +30,14 @@ import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  AwardTenderButton,
+  EditChecklistButton,
+  EditTenderButton,
+  NewGuaranteeButton,
+  NewTenderButton,
+} from './forms.tsx';
+
 const TENDER_TONE = new Map<Tender['status'], Tone>([
   ['preparing', 'info'],
   ['submitted', 'warn'],
@@ -178,8 +186,10 @@ function TenderDialog({
         />
         <QueryView query={checklist}>
           {(data) =>
-            data.items.length === 0 ? null : (
-              <div>
+            data.items.length === 0 ? (
+              <EditChecklistButton tender={tender} items={data.items} />
+            ) : (
+              <div className="flex flex-col gap-2">
                 <p className="mb-2 text-[11px] font-semibold tracking-wider text-muted uppercase">
                   {t('checklist', {
                     done: data.items.filter((item) => item.done).length,
@@ -200,10 +210,17 @@ function TenderDialog({
                     </li>
                   ))}
                 </ul>
+                <span>
+                  <EditChecklistButton tender={tender} items={data.items} />
+                </span>
               </div>
             )
           }
         </QueryView>
+        <span className="flex flex-wrap justify-end gap-2">
+          <EditTenderButton tender={tender} />
+          <AwardTenderButton tender={tender} />
+        </span>
         {tender.allowedActions.includes('record_outcome') &&
           (recording ? (
             <OutcomeForm tender={tender} onDone={onClose} />
@@ -234,7 +251,14 @@ export function TendersTab(): ReactNode {
         label={t('register')}
         list={tenders}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('registerHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('registerHint')}</p>
+            <span className="flex flex-wrap gap-2">
+              <NewTenderButton />
+            </span>
+          </div>
+        }
         columns={[
           {
             id: 'title',
@@ -302,7 +326,12 @@ export function GuaranteesTab(): ReactNode {
         label={t('guarantees')}
         list={guarantees}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('guarantees')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('guarantees')}</p>
+            <NewGuaranteeButton />
+          </div>
+        }
         columns={[
           { id: 'kind', header: t('kind'), cell: (row) => kinds(row.kind) },
           { id: 'issuer', header: t('issuer'), cell: (row) => row.issuer },

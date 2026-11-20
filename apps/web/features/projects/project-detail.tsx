@@ -32,10 +32,20 @@ import { browserCall } from '../../lib/api/browser.ts';
 import { errorCodeOf, useErrorMessage } from '../common/errors.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { RecordTable } from '../common/record-table.tsx';
+import { useCanRead } from '../common/session.tsx';
 import { ErrorState, LoadingState, QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  EditProjectButton,
+  EditTeamButton,
+  NewBudgetVersionButton,
+  NewFeeAgreementButton,
+  NewMilestoneButton,
+  ProjectStatusButton,
+  TaskCommentsButton,
+} from './forms.tsx';
 import { MilestoneStatusPill, TaskStatusPill } from './status.tsx';
 
 /** Money on this project, if the role may see it; a 403 here is expected, not an error. */
@@ -164,7 +174,13 @@ function DeadlineDialog({
   );
 }
 
-function Milestones({ projectId }: { readonly projectId: string }): ReactNode {
+function Milestones({
+  projectId,
+  project,
+}: {
+  readonly projectId: string;
+  readonly project: Project;
+}): ReactNode {
   const t = useTranslations('projects');
   const message = useErrorMessage();
   const milestones = useQuery({
@@ -181,7 +197,11 @@ function Milestones({ projectId }: { readonly projectId: string }): ReactNode {
     { success: t('signedOff'), invalidate: [projects.listMilestones.id] },
   );
   return (
-    <Card title={t('milestones')} description={t('milestonesHint')}>
+    <Card
+      title={t('milestones')}
+      description={t('milestonesHint')}
+      actions={<NewMilestoneButton project={project} />}
+    >
       {signOff.isError && (
         <div className="p-3">
           <Callout tone="crit" title={message(signOff.error)} />
@@ -440,6 +460,7 @@ function TaskBoard({ projectId }: { readonly projectId: string }): ReactNode {
                             <TaskStatusPill status={task.status} />
                           </div>
                         )}
+                        <TaskCommentsButton task={task} />
                       </li>
                     ))}
                   </ul>
@@ -461,14 +482,25 @@ function TaskBoard({ projectId }: { readonly projectId: string }): ReactNode {
   );
 }
 
-function Team({ projectId }: { readonly projectId: string }): ReactNode {
+function Team({
+  projectId,
+  project,
+}: {
+  readonly projectId: string;
+  readonly project: Project;
+}): ReactNode {
   const t = useTranslations('projects');
   const team = useQuery({
     queryKey: [projects.getProjectTeam.id, projectId],
     queryFn: () => browserCall(projects.getProjectTeam, { params: { id: projectId } }),
   });
   return (
-    <Card title={t('team')}>
+    <Card
+      title={t('team')}
+      {...(team.data !== undefined && {
+        actions: <EditTeamButton project={project} team={team.data.items} />,
+      })}
+    >
       <QueryView query={team}>
         {(data) => (
           <DataTable
@@ -506,7 +538,13 @@ function Team({ projectId }: { readonly projectId: string }): ReactNode {
   );
 }
 
-function ProjectMoney({ projectId }: { readonly projectId: string }): ReactNode {
+function ProjectMoney({
+  projectId,
+  project,
+}: {
+  readonly projectId: string;
+  readonly project: Project;
+}): ReactNode {
   const t = useTranslations('projects');
   const budget = useQuery({
     queryKey: [projects.getProjectBudget.id, projectId],
@@ -520,12 +558,17 @@ function ProjectMoney({ projectId }: { readonly projectId: string }): ReactNode 
     retry: false,
   });
   const fees = useList(projects.listFeeAgreements, { projectId });
+  // Fee agreements are entered by the books: partners and finance.
+  const canBook = useCanRead('finance');
   if (errorCodeOf(budget.error) === 'FORBIDDEN')
     return <Callout tone="info" title={t('moneyHidden')} />;
   return (
     <div className="flex flex-col gap-4">
       <Card
         title={t('budget')}
+        {...(budget.data !== undefined && {
+          actions: <NewBudgetVersionButton project={project} budget={budget.data} />,
+        })}
         {...(budget.data !== undefined && {
           description: t('budgetVersion', { version: budget.data.version }),
         })}
@@ -603,7 +646,12 @@ function ProjectMoney({ projectId }: { readonly projectId: string }): ReactNode 
         list={fees}
         getRowId={(row) => row.id}
         empty={t('noFees')}
-        toolbar={<p className="text-sm font-semibold">{t('fees')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('fees')}</p>
+            {canBook && <NewFeeAgreementButton projectId={projectId} />}
+          </div>
+        }
         columns={[
           { id: 'payee', header: t('payee'), cell: (row) => row.payee.name },
           { id: 'description', header: t('description'), cell: (row) => row.description },
@@ -641,7 +689,13 @@ function Header({ project }: { readonly project: Project }): ReactNode {
       <PageHeader
         title={`${project.code} · ${project.name}`}
         description={t('headerLine', { type: types(project.type), manager: project.manager.name })}
-        actions={<StatusPill tone="good">{statuses(project.status)}</StatusPill>}
+        actions={
+          <span className="flex flex-wrap items-center gap-2">
+            <StatusPill tone="good">{statuses(project.status)}</StatusPill>
+            <ProjectStatusButton project={project} />
+            <EditProjectButton project={project} />
+          </span>
+        }
       />
     </>
   );
@@ -670,9 +724,21 @@ export function ProjectDetail({ id }: { readonly id: string }): ReactNode {
           label={t('projectSections')}
           items={[
             { value: 'board', label: t('taskBoard'), content: <TaskBoard projectId={id} /> },
-            { value: 'milestones', label: t('milestones'), content: <Milestones projectId={id} /> },
-            { value: 'team', label: t('team'), content: <Team projectId={id} /> },
-            { value: 'money', label: t('budgetAndPnl'), content: <ProjectMoney projectId={id} /> },
+            {
+              value: 'milestones',
+              label: t('milestones'),
+              content: <Milestones projectId={id} project={project.data} />,
+            },
+            {
+              value: 'team',
+              label: t('team'),
+              content: <Team projectId={id} project={project.data} />,
+            },
+            {
+              value: 'money',
+              label: t('budgetAndPnl'),
+              content: <ProjectMoney projectId={id} project={project.data} />,
+            },
           ]}
         />
       </div>

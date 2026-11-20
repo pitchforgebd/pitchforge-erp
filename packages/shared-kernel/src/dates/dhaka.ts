@@ -48,3 +48,49 @@ export function formatDateTime(instant: Date): string {
   const parts = timeFormatter.formatToParts(instant);
   return `${formatDate(toBusinessDate(instant))}, ${part(parts, 'hour')}:${part(parts, 'minute')}`;
 }
+
+const wallClockFormatter = new Intl.DateTimeFormat('en-GB', {
+  timeZone: BUSINESS_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+});
+
+/** The Dhaka wall-clock reading of an instant, as if it were UTC, in milliseconds. */
+function wallClockMs(instant: Date): number {
+  const parts = wallClockFormatter.formatToParts(instant);
+  const value = (type: Intl.DateTimeFormatPartTypes) => Number(part(parts, type));
+  return Date.UTC(value('year'), value('month') - 1, value('day'), value('hour'), value('minute'));
+}
+
+const TIME = /^([01][0-9]|2[0-3]):([0-5][0-9])$/;
+
+/**
+ * The instant at a Dhaka date and "HH:MM", e.g. a tender deadline typed as 11:00 in Dhaka.
+ * Undefined for a time that is not HH:MM. Uses the time-zone database, like the rest.
+ */
+export function fromDhakaWallClock(date: BusinessDate, time: string): Date | undefined {
+  const match = TIME.exec(time);
+  if (match === null) return undefined;
+  // A BusinessDate is always YYYY-MM-DD.
+  const guess = Date.UTC(
+    Number(date.slice(0, 4)),
+    Number(date.slice(5, 7)) - 1,
+    Number(date.slice(8, 10)),
+    Number(match[1]),
+    Number(match[2]),
+  );
+  return new Date(guess - (wallClockMs(new Date(guess)) - guess));
+}
+
+/** The Dhaka date and "HH:MM" of an instant, to show or edit it. */
+export function toDhakaWallClock(instant: Date): {
+  readonly date: BusinessDate;
+  readonly time: string;
+} {
+  const parts = timeFormatter.formatToParts(instant);
+  return { date: toBusinessDate(instant), time: `${part(parts, 'hour')}:${part(parts, 'minute')}` };
+}

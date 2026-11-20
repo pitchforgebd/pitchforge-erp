@@ -47,8 +47,12 @@ test('finance pays an approved claim from a bank account', async ({ page }) => {
   await signIn(page, FINANCE);
   await page.goto('/finance');
   await openTab(page, 'Claims and advances');
-  await page.getByRole('button', { name: 'Pay Mehedi Hasan' }).first().click();
   const dialog = page.getByRole('dialog', { name: 'Pay Mehedi Hasan' });
+  // Under load the first click can land before the page is interactive.
+  await expect(async () => {
+    await page.getByRole('button', { name: 'Pay Mehedi Hasan' }).first().click();
+    await expect(dialog).toBeVisible({ timeout: 2_000 });
+  }).toPass();
   await dialog.getByLabel(/Pay from/).selectOption({ index: 1 });
   await dialog.getByRole('button', { name: 'Pay', exact: true }).click();
   await expect(toast(page, 'Paid and posted.')).toBeVisible();

@@ -20,7 +20,7 @@ import {
 } from '../data/crm-records.ts';
 import { mock } from '../define.ts';
 import type { MockHandler, MockReply, MockRequest } from '../define.ts';
-import { idOf, parentIdOf, serveList, serveOne, viewerOf } from '../serve.ts';
+import { idOf, parentIdOf, serveList, serveOne, serveValue, viewerOf } from '../serve.ts';
 import type { Viewer } from '../serve.ts';
 
 const salesOnly =
@@ -59,6 +59,24 @@ const deals = (viewer: Viewer) => opportunitiesFor(viewer.role);
 const tenders = (viewer: Viewer) => tendersFor(viewer.role);
 
 export const crmRecordHandlers: readonly MockHandler[] = [
+  /* Possible duplicates: a name match against leads and clients the viewer can see. */
+  serveValue(crm.findDuplicates, (viewer, request) => {
+    const name = (new URL(request.request.url).searchParams.get('name') ?? '').trim().toLowerCase();
+    if (!readsSales(viewer.role) || name.length < 3) return { items: [] };
+    const matches = (
+      rows: readonly { id: string; name: string }[],
+      recordType: 'lead' | 'client',
+    ) =>
+      rows
+        .filter((row) => row.name.toLowerCase().includes(name))
+        .map((row) => ({ recordType, recordId: row.id, name: row.name, matchedOn: ['name'] }));
+    return {
+      items: [
+        ...matches(leadsFor(viewer.role), 'lead'),
+        ...matches(clientsFor(viewer.role), 'client'),
+      ],
+    };
+  }),
   serveList(crm.listLeads, (viewer) => leadsFor(viewer.role)),
   serveOne(crm.getLead, (viewer) => leadsFor(viewer.role)),
   mock(crm.convertLead, (request) =>

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { z } from 'zod';
 
+import { fromDhakaWallClock, parseBusinessDate, toDhakaWallClock } from '@pitchforge/shared-kernel';
 import {
   Button,
   Callout,
@@ -31,7 +32,19 @@ import { useCommand } from './step-up.tsx';
  */
 
 export type FieldKind =
-  'text' | 'textarea' | 'money' | 'date' | 'month' | 'select' | 'integer' | 'decimal' | 'checkbox';
+  | 'text'
+  | 'textarea'
+  | 'money'
+  | 'date'
+  | 'month'
+  | 'select'
+  | 'integer'
+  | 'decimal'
+  | 'checkbox'
+  /** Typed in Dhaka time, sent as a UTC timestamp. */
+  | 'datetime'
+  /** Not shown; kept so an edit sends it back, e.g. the id of an existing row. */
+  | 'hidden';
 
 export interface FieldSpec {
   readonly name: string;
@@ -90,6 +103,13 @@ function startValues(specs: readonly FormSpec[], initial: Initial): FormValues {
   );
 }
 
+/** A stored UTC timestamp as the Dhaka "YYYY-MM-DDTHH:MM" a datetime field shows. */
+export function dhakaInput(timestamp: string | null): string {
+  if (timestamp === null) return '';
+  const { date, time } = toDhakaWallClock(new Date(timestamp));
+  return `${date}T${time}`;
+}
+
 /** What one field sends: reshaped only, never calculated. */
 function wireValue(spec: FieldSpec, raw: Scalar | undefined): unknown {
   if (spec.kind === 'checkbox') return raw === true;
@@ -98,6 +118,11 @@ function wireValue(spec: FieldSpec, raw: Scalar | undefined): unknown {
   if (spec.kind === 'money') return moneyFromInput(text) ?? { amount: text, currency: 'BDT' };
   if (spec.kind === 'integer') return /^-?[0-9]+$/.test(text) ? Number.parseInt(text, 10) : text;
   if (spec.kind === 'decimal') return text.replaceAll(',', '');
+  if (spec.kind === 'datetime') {
+    const [date = '', time = ''] = text.split('T');
+    const parsed = parseBusinessDate(date);
+    return (parsed.ok ? fromDhakaWallClock(parsed.value, time)?.toISOString() : undefined) ?? text;
+  }
   return text;
 }
 
@@ -148,6 +173,7 @@ function Control({
   const t = useTranslations('forms');
   const common = useTranslations('common');
   const text = typeof value === 'string' ? value : '';
+  if (spec.kind === 'hidden') return null;
   if (spec.kind === 'checkbox') {
     return (
       <Checkbox
@@ -207,6 +233,7 @@ function Control({
         return (
           <Input
             {...control}
+            type={spec.kind === 'datetime' ? 'datetime-local' : 'text'}
             value={text}
             inputMode={
               spec.kind === 'money' || spec.kind === 'decimal'
@@ -310,6 +337,8 @@ export interface FormDialogProps<S extends z.ZodType> {
   readonly invalidate?: readonly string[];
   /** A line under the fields, e.g. "The server works out the VAT." */
   readonly note?: string;
+  /** Shown under the fields and fed the current values, e.g. possible duplicates. */
+  readonly aside?: (values: FormValues) => ReactNode;
   readonly danger?: boolean;
   readonly onClose: () => void;
 }
@@ -327,6 +356,7 @@ export function FormDialog<S extends z.ZodType>({
   success,
   invalidate = [],
   note,
+  aside,
   danger = false,
   onClose,
 }: FormDialogProps<S>): ReactNode {
@@ -397,6 +427,7 @@ export function FormDialog<S extends z.ZodType>({
             />
           ),
         )}
+        {aside?.(values)}
         {note !== undefined && <p className="text-xs text-muted">{note}</p>}
       </div>
     </Dialog>
