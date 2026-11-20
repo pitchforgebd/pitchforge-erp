@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F8, people and purchasing forms** in `apps/web`: 22 forms for employees (details, protected details after step-up, lifecycle events), attendance corrections, shifts, leave types, salary structures, advances and loans, final settlements, vendors, purchase orders, assets and their assignment, licences and deposits. Edits of NID, TIN and bank details leave out empty fields, so the stored value is kept rather than cleared. 8 new Playwright tests.
+
 - **Phase 1 sprint F7, sales and project forms** in `apps/web`: 28 forms on `FormDialog` for leads, clients, contacts, activity, deals, pipeline stages, quotations, contracts, tenders, the bid checklist, awards, guarantees, projects and their status, team, budget versions, milestones, fee agreements, task comments and timesheets. New leads and clients show possible duplicates as the name is typed. `FormDialog` gained date-and-time fields (typed in Dhaka time, sent as UTC) and hidden fields. `@pitchforge/shared-kernel` gained `fromDhakaWallClock` and `toDhakaWallClock`, read from the time-zone database. 9 new Playwright tests; axe found two status buttons (project and cheque) whose accessible name did not contain their visible text, now fixed.
 
 - **Phase 1 sprint F6, finance and billing forms** in `apps/web`: one `FormDialog` for every create and edit screen, validated with the contract schema before sending, and 32 forms built on it across finance, the ledger, billing and partners (see the Phase 1 progress table). Employees file and submit expense claims and ask for advances from `/hr`. 10 new Playwright tests, including axe on the new dialogs.

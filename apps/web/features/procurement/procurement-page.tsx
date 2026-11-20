@@ -26,11 +26,23 @@ import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { useCanRead } from '../common/session.tsx';
+import { useCanRead, useSession } from '../common/session.tsx';
 import { ForbiddenState } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 import { FlowStatusPill, MonthText } from '../hr/status.tsx';
+
+import {
+  AssetActions,
+  EditLicenceButton,
+  EditOrderButton,
+  EditVendorButton,
+  NewAssetButton,
+  NewDepositButton,
+  NewLicenceButton,
+  NewOrderButton,
+  NewVendorButton,
+} from './forms.tsx';
 
 function RequisitionDialog({ onClose }: { readonly onClose: () => void }): ReactNode {
   const t = useTranslations('procurement');
@@ -294,6 +306,7 @@ function OrderDialog({
       closeLabel={common('close')}
       footer={
         <>
+          <EditOrderButton order={order} />
           {order.allowedActions.includes('amend') && (
             <Button
               variant="secondary"
@@ -369,6 +382,8 @@ function OrderDialog({
 
 function OrdersTab(): ReactNode {
   const t = useTranslations('procurement');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const orders = useList(prc.listPurchaseOrders, {});
   const receipts = useList(prc.listGoodsReceipts, {});
   const [open, setOpen] = useState<PurchaseOrder | null>(null);
@@ -381,7 +396,12 @@ function OrdersTab(): ReactNode {
         label={t('orders')}
         list={orders}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('ordersHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('ordersHint')}</p>
+            {manages && <NewOrderButton />}
+          </div>
+        }
         columns={[
           {
             id: 'number',
@@ -449,13 +469,20 @@ function OrdersTab(): ReactNode {
 
 function VendorsTab(): ReactNode {
   const t = useTranslations('procurement');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const vendors = useList(prc.listVendors, {});
   return (
     <RecordTable
       label={t('vendors')}
       list={vendors}
       getRowId={(row) => row.id}
-      toolbar={<p className="text-xs text-muted">{t('vendorsHint')}</p>}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted">{t('vendorsHint')}</p>
+          {manages && <NewVendorButton />}
+        </div>
+      }
       columns={[
         { id: 'name', header: t('vendor'), cell: (row) => row.name },
         { id: 'bin', header: t('bin'), cell: (row) => row.bin ?? '—' },
@@ -474,6 +501,12 @@ function VendorsTab(): ReactNode {
               (row.bankAccount ?? '—')
             ),
         },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditVendorButton vendor={row} />,
+        },
       ]}
     />
   );
@@ -481,6 +514,8 @@ function VendorsTab(): ReactNode {
 
 function AssetsTab(): ReactNode {
   const t = useTranslations('procurement');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const status = useTranslations('procurement.assetStatus');
   const message = useErrorMessage();
   const assets = useList(prc.listAssets, {});
@@ -499,7 +534,12 @@ function AssetsTab(): ReactNode {
         label={t('assets')}
         list={assets}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('assetsHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('assetsHint')}</p>
+            {manages && <NewAssetButton />}
+          </div>
+        }
         columns={[
           { id: 'tag', header: t('tag'), cell: (row) => <Tag>{row.tag}</Tag> },
           { id: 'name', header: t('asset'), cell: (row) => row.name },
@@ -529,19 +569,23 @@ function AssetsTab(): ReactNode {
             id: 'actions',
             header: '',
             align: 'right',
-            cell: (row) =>
-              row.allowedActions.includes('return') ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  aria-label={t('returnLabel', { tag: row.tag })}
-                  onClick={() => {
-                    returnAsset.mutate(row);
-                  }}
-                >
-                  {t('return')}
-                </Button>
-              ) : null,
+            cell: (row) => (
+              <span className="flex justify-end gap-2">
+                <AssetActions asset={row} />
+                {row.allowedActions.includes('return') && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-label={t('returnLabel', { tag: row.tag })}
+                    onClick={() => {
+                      returnAsset.mutate(row);
+                    }}
+                  >
+                    {t('return')}
+                  </Button>
+                )}
+              </span>
+            ),
           },
         ]}
       />
@@ -639,6 +683,8 @@ function DepreciationTab(): ReactNode {
 
 function RenewalsTab(): ReactNode {
   const t = useTranslations('procurement');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const licences = useList(prc.listLicences, {});
   const deposits = useList(prc.listDepositsGiven, {});
   return (
@@ -647,7 +693,12 @@ function RenewalsTab(): ReactNode {
         label={t('renewals')}
         list={licences}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('renewalsHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('renewalsHint')}</p>
+            {manages && <NewLicenceButton />}
+          </div>
+        }
         columns={[
           { id: 'name', header: t('licence'), cell: (row) => row.name },
           { id: 'kind', header: t('kind'), cell: (row) => t(`licenceKinds.${row.kind}`) },
@@ -658,13 +709,24 @@ function RenewalsTab(): ReactNode {
             cell: (row) => <Money value={row.cost} />,
           },
           { id: 'renews', header: t('renewsOn'), cell: (row) => <DateText value={row.renewsOn} /> },
+          {
+            id: 'actions',
+            header: '',
+            align: 'right',
+            cell: (row) => (manages ? <EditLicenceButton licence={row} /> : null),
+          },
         ]}
       />
       <RecordTable
         label={t('deposits')}
         list={deposits}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('deposits')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('deposits')}</p>
+            {manages && <NewDepositButton />}
+          </div>
+        }
         columns={[
           { id: 'party', header: t('party'), cell: (row) => row.party },
           { id: 'purpose', header: t('purpose'), cell: (row) => row.purpose },

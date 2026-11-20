@@ -26,11 +26,20 @@ import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Card } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
+import { useSession } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  EditShiftButton,
+  EmployeeActions,
+  NewCorrectionButton,
+  NewEmployeeButton,
+  NewLeaveTypeButton,
+  NewShiftButton,
+} from './forms.tsx';
 import { FlowStatusPill, MonthText } from './status.tsx';
 
 const EMPLOYEE_TONE = new Map<Employee['status'], Tone>([
@@ -169,6 +178,7 @@ function EmployeeDialog({
       closeLabel={common('close')}
     >
       <div className="flex flex-col gap-4">
+        <EmployeeActions employee={employee} />
         <Details
           items={[
             [t('type'), type(employee.employmentType)],
@@ -226,6 +236,8 @@ function EmployeeDialog({
 
 export function EmployeesTab(): ReactNode {
   const t = useTranslations('hr');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const status = useTranslations('hr.employeeStatus');
   const [q, setQ] = useState('');
   const employees = useList(hr.listEmployees, q.trim() === '' ? {} : { q: q.trim() });
@@ -237,17 +249,20 @@ export function EmployeesTab(): ReactNode {
         list={employees}
         getRowId={(row) => row.id}
         toolbar={
-          <Field label={t('search')}>
-            {(control) => (
-              <Input
-                {...control}
-                value={q}
-                onChange={(event) => {
-                  setQ(event.target.value);
-                }}
-              />
-            )}
-          </Field>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <Field label={t('search')}>
+              {(control) => (
+                <Input
+                  {...control}
+                  value={q}
+                  onChange={(event) => {
+                    setQ(event.target.value);
+                  }}
+                />
+              )}
+            </Field>
+            {manages && <NewEmployeeButton />}
+          </div>
         }
         columns={[
           { id: 'code', header: t('code'), cell: (row) => <Tag>{row.employeeCode}</Tag> },
@@ -293,6 +308,8 @@ export function EmployeesTab(): ReactNode {
 
 export function AttendanceTab(): ReactNode {
   const t = useTranslations('hr');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const day = useTranslations('hr.dayStatus');
   const message = useErrorMessage();
   const records = useList(hr.listAttendance, {});
@@ -350,7 +367,12 @@ export function AttendanceTab(): ReactNode {
         label={t('corrections')}
         list={regularisations}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('corrections')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('corrections')}</p>
+            <NewCorrectionButton />
+          </div>
+        }
         columns={[
           { id: 'date', header: t('date'), cell: (row) => <DateText value={row.date} /> },
           { id: 'employee', header: t('employee'), cell: (row) => row.employee.name },
@@ -379,7 +401,11 @@ export function AttendanceTab(): ReactNode {
           },
         ]}
       />
-      <Card title={t('shifts')} description={t('shiftsHint')}>
+      <Card
+        title={t('shifts')}
+        description={t('shiftsHint')}
+        {...(manages && { actions: <NewShiftButton /> })}
+      >
         <ul className="flex flex-col gap-2 text-sm">
           {shifts.items.map((shift) => (
             <li key={shift.id} className="flex flex-wrap justify-between gap-2">
@@ -391,6 +417,7 @@ export function AttendanceTab(): ReactNode {
                   late: shift.lateAfterMinutes,
                 })}
               </span>
+              {manages && <EditShiftButton shift={shift} />}
             </li>
           ))}
         </ul>
@@ -415,6 +442,8 @@ export function AttendanceTab(): ReactNode {
 
 export function LeaveAdminTab(): ReactNode {
   const t = useTranslations('hr');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const balances = useList(hr.listLeaveBalances, {});
   const people = useList(hr.listEmployees, {});
   const nameOf = new Map(people.items.map((person) => [person.id, person.name]));
@@ -467,7 +496,12 @@ export function LeaveAdminTab(): ReactNode {
         label={t('leaveTypes')}
         list={types}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('leaveTypes')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('leaveTypes')}</p>
+            {manages && <NewLeaveTypeButton />}
+          </div>
+        }
         columns={[
           { id: 'name', header: t('leaveType'), cell: (row) => row.name },
           { id: 'days', header: t('daysPerYear'), align: 'right', cell: (row) => row.daysPerYear },

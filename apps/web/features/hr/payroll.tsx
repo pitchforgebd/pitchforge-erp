@@ -23,10 +23,12 @@ import {
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Details, RecordTable } from '../common/record-table.tsx';
+import { useSession } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { NewLoanButton, NewSalaryStructureButton, NewSettlementButton } from './forms.tsx';
 import { FlowStatusPill, MonthText } from './status.tsx';
 
 const MONTHS = ['2026-11', '2026-12'] as const;
@@ -285,6 +287,8 @@ function RunDialog({
 
 export function PayrollRunsTab(): ReactNode {
   const t = useTranslations('payroll');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const runs = useList(pay.listPayrollRuns, {});
   const structures = useList(pay.listSalaryStructures, {});
   const [open, setOpen] = useState<PayrollRun | null>(null);
@@ -346,7 +350,12 @@ export function PayrollRunsTab(): ReactNode {
         label={t('structures')}
         list={structures}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('structures')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('structures')}</p>
+            {manages && <NewSalaryStructureButton />}
+          </div>
+        }
         columns={[
           {
             id: 'employee',
@@ -476,6 +485,8 @@ function SettlementDialog({
 
 export function LoansAndSettlementsTab(): ReactNode {
   const t = useTranslations('payroll');
+  // Partners run HR, payroll and purchasing in the sample company.
+  const manages = useSession().permissions.includes('admin.read');
   const kinds = useTranslations('payroll.loanKinds');
   const message = useErrorMessage();
   const loans = useList(pay.listSalaryLoans, {});
@@ -503,7 +514,12 @@ export function LoansAndSettlementsTab(): ReactNode {
         label={t('loans')}
         list={loans}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('loans')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('loans')}</p>
+            {manages && <NewLoanButton />}
+          </div>
+        }
         columns={[
           { id: 'employee', header: t('employee'), cell: (row) => row.employee.name },
           { id: 'kind', header: t('kind'), cell: (row) => kinds(row.kind) },
@@ -553,7 +569,12 @@ export function LoansAndSettlementsTab(): ReactNode {
         label={t('settlements')}
         list={settlements}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('settlements')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('settlements')}</p>
+            {manages && <NewSettlementButton />}
+          </div>
+        }
         columns={[
           {
             id: 'employee',
