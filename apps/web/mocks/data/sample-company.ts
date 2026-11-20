@@ -22,6 +22,7 @@ const ALL_AREAS = [
   'projects',
   'crm',
   'hr',
+  'payroll',
   'procurement',
   'reports',
   'audit',
@@ -47,6 +48,9 @@ export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
       'ledger',
       'partners',
       'crm',
+      'hr',
+      'payroll',
+      'procurement',
       'reports',
       'audit',
     ]),
@@ -55,13 +59,13 @@ export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
     userId: id(3),
     name: 'Nusrat Jahan',
     email: 'nusrat@pitchforge.example',
-    permissions: read(['approvals', 'projects', 'crm', 'hr']),
+    permissions: read(['approvals', 'projects', 'crm', 'hr', 'procurement']),
   },
   employee: {
     userId: id(4),
     name: 'Arif Hossain',
     email: 'arif@pitchforge.example',
-    permissions: read(['projects', 'hr']),
+    permissions: read(['projects', 'hr', 'procurement']),
   },
 };
 

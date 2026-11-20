@@ -7,6 +7,9 @@ import { coreRecordHandlers } from './handlers/core-records.ts';
 import { coreHandlers } from './handlers/core.ts';
 import { crmRecordHandlers } from './handlers/crm-records.ts';
 import { generatedHandlers } from './handlers/generated.ts';
+import { hrRecordHandlers } from './handlers/hr-records.ts';
+import { payrollRecordHandlers } from './handlers/payroll-records.ts';
+import { procurementRecordHandlers } from './handlers/procurement-records.ts';
 import { projectRecordHandlers } from './handlers/project-records.ts';
 
 /** Mock handlers except for modules already switched to the real API. */
@@ -18,6 +21,9 @@ export function mockHandlers(realModules: readonly string[]) {
     ...billingRecordHandlers,
     ...projectRecordHandlers,
     ...crmRecordHandlers,
+    ...hrRecordHandlers,
+    ...payrollRecordHandlers,
+    ...procurementRecordHandlers,
     ...generatedHandlers,
   ]
     .filter(({ module }) => !realModules.includes(module))

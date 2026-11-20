@@ -43,7 +43,7 @@ export const Employee = z
     /** Masked except the last 4; HR and the employee only. */
     nid: restricted(Masked, 'nid'),
     tin: restricted(Masked.nullable(), 'tin'),
-    bankAccount: restricted(Masked.nullable(), 'bank'),
+    bankAccount: restricted(Masked.nullable(), 'personal-bank'),
     allowedActions: allowedActions(['update', 'update_protected', 'offboard']),
     meta: AuditMeta,
   })

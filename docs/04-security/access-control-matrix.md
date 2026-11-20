@@ -27,12 +27,14 @@ Codes: **F** full · **O** own scope · **A** approve · **S** submit/request ·
 
 ## Field-level rules
 
-| Field                                | Visible to                                       |
-| ------------------------------------ | ------------------------------------------------ |
-| Salary, allowances, payslip amounts  | Partner, HR, the employee themself               |
-| Bank account and NID                 | HR (masked except last 4), the employee themself |
-| Partner capital and current balances | Partners, Finance, Auditor                       |
-| Labour cost per person on a project  | Partner, Finance; PMs see project totals only    |
+| Field                               | Visible to                                       |
+| ----------------------------------- | ------------------------------------------------ |
+| Salary, allowances, payslip amounts | Partner, HR, the employee themself               |
+| Bank account and NID                | HR (masked except last 4), the employee themself |
+
+A person's bank account is the restricted kind `personal-bank`, separate from `bank` (vendor and company accounts, which Finance reads), so Finance never receives employees' accounts.
+| Partner capital and current balances | Partners, Finance, Auditor |
+| Labour cost per person on a project | Partner, Finance; PMs see project totals only |
 
 ## Segregation of duties
 

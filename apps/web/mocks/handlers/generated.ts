@@ -9,6 +9,9 @@ import { billingRecordHandlers } from './billing-records.ts';
 import { coreRecordHandlers } from './core-records.ts';
 import { SESSION_COOKIE, coreHandlers } from './core.ts';
 import { crmRecordHandlers } from './crm-records.ts';
+import { hrRecordHandlers } from './hr-records.ts';
+import { payrollRecordHandlers } from './payroll-records.ts';
+import { procurementRecordHandlers } from './procurement-records.ts';
 import { projectRecordHandlers } from './project-records.ts';
 
 const handled = new Set(
@@ -19,6 +22,9 @@ const handled = new Set(
     ...billingRecordHandlers,
     ...projectRecordHandlers,
     ...crmRecordHandlers,
+    ...hrRecordHandlers,
+    ...payrollRecordHandlers,
+    ...procurementRecordHandlers,
   ].map(({ endpointId }) => endpointId),
 );
 

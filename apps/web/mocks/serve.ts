@@ -6,6 +6,7 @@ import { mock } from './define.ts';
 import type { MockHandler, MockReply, MockRequest } from './define.ts';
 import { viewerOf, withoutRestricted } from './restrict.ts';
 import type { Viewer } from './restrict.ts';
+import { STEP_UP_COOKIE } from './session.ts';
 
 export { viewerOf, withoutRestricted };
 export type { Viewer };
@@ -132,4 +133,68 @@ export function serveValue(
         : { json: withoutRestricted(endpoint.response, result, viewer) };
     }),
   );
+}
+
+/** The JSON body of a command, or an empty object when there is none. */
+export async function bodyOf(request: MockRequest): Promise<Record<string, unknown>> {
+  const text = await request.request.clone().text();
+  return text === '' ? {} : (JSON.parse(text) as Record<string, unknown>);
+}
+
+/** Like the API, refuse a body that breaks the endpoint's schema before doing anything. */
+async function bodyIsValid(endpoint: Endpoint, request: MockRequest): Promise<boolean> {
+  if (endpoint.body === undefined) return true;
+  try {
+    return endpoint.body.safeParse(await bodyOf(request)).success;
+  } catch {
+    return false;
+  }
+}
+
+/** True when the session passed step-up in the last few minutes. */
+export function steppedUp(request: MockRequest): boolean {
+  return request.cookie(STEP_UP_COOKIE) !== undefined;
+}
+
+interface Actionable {
+  readonly id: string;
+  readonly allowedActions: readonly string[];
+}
+
+/**
+ * A command on one record: 404 when the viewer cannot see it, 403 when the action is not in
+ * its allowedActions, step-up first when asked. The outcome itself is fixed by the caller.
+ */
+export function actOn<T extends Actionable>(
+  endpoint: Endpoint,
+  rows: (viewer: Viewer) => readonly T[],
+  action: string,
+  outcome: (row: T, body: Record<string, unknown>, viewer: Viewer) => MockReply,
+  options: { readonly stepUp?: boolean } = {},
+): MockHandler {
+  return mock(endpoint, async (request) => {
+    const viewer = viewerOf(request);
+    if (viewer === undefined) return { problem: 'UNAUTHENTICATED' };
+    if (!(await bodyIsValid(endpoint, request))) return { problem: 'VALIDATION' };
+    // `/things/{id}:act` or a nested `/things/{id}/part`.
+    const wanted = UUID_SEGMENT.test(idOf(request)) ? idOf(request) : parentIdOf(request);
+    const row = rows(viewer).find((candidate) => candidate.id === wanted);
+    if (row === undefined) return { problem: 'NOT_FOUND' };
+    if (!row.allowedActions.includes(action)) return { problem: 'FORBIDDEN' };
+    if (options.stepUp === true && !steppedUp(request)) return { problem: 'STEP_UP_REQUIRED' };
+    return outcome(row, await bodyOf(request), viewer);
+  });
+}
+
+/** Any handler that needs the signed-in viewer. */
+export function withViewerAsync(
+  endpoint: Endpoint,
+  reply: (viewer: Viewer, request: MockRequest) => MockReply | Promise<MockReply>,
+): MockHandler {
+  return mock(endpoint, async (request) => {
+    const viewer = viewerOf(request);
+    if (viewer === undefined) return { problem: 'UNAUTHENTICATED' };
+    if (!(await bodyIsValid(endpoint, request))) return { problem: 'VALIDATION' };
+    return reply(viewer, request);
+  });
 }

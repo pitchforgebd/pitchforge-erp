@@ -30,6 +30,8 @@ export function allowedActions<const T extends readonly [string, ...string[]]>(a
 export const RESTRICTED_KINDS = [
   'salary',
   'bank',
+  /** A person's own bank account: HR and the person only, never Finance by default. */
+  'personal-bank',
   'nid',
   'tin',
   'partner-balance',

@@ -4469,6 +4469,7 @@
               "enum": [
                 "salary",
                 "bank",
+                "personal-bank",
                 "nid",
                 "tin",
                 "partner-balance",
@@ -6082,7 +6083,7 @@
             "pattern": "^•+[0-9A-Za-z]{0,4}$",
             "description": "Omitted without field permission.",
             "example": "••••••1234",
-            "x-restricted": "bank"
+            "x-restricted": "personal-bank"
           },
           "allowedActions": {
             "type": "array",
@@ -10550,6 +10551,7 @@
               "enum": [
                 "salary",
                 "bank",
+                "personal-bank",
                 "nid",
                 "tin",
                 "partner-balance",
@@ -13078,6 +13080,7 @@
               "enum": [
                 "salary",
                 "bank",
+                "personal-bank",
                 "nid",
                 "tin",
                 "partner-balance",

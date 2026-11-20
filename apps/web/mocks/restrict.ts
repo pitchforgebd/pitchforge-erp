@@ -36,8 +36,8 @@ const FIELD_ACCESS = new Map<SampleRole, readonly RestrictedKind[]>([
   ['employee', []],
 ]);
 
-/** A person reads their own salary, bank, NID and TIN. */
-const OWN_FIELDS: readonly RestrictedKind[] = ['salary', 'bank', 'nid', 'tin'];
+/** A person reads their own salary, bank details, NID and TIN. */
+const OWN_FIELDS: readonly RestrictedKind[] = ['salary', 'bank', 'personal-bank', 'nid', 'tin'];
 
 function isOwnRecord(value: Record<string, unknown>, viewer: Viewer): boolean {
   const person = value['employee'];

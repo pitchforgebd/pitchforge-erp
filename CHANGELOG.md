@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F4, people and procurement** in `apps/web`: `/hr` (self-service check-in, leave and payslips, salary tax declaration; employees, attendance, leave; payroll runs with a start wizard, salary sheet, lock after step-up and bank file; salary structures, loans, final settlements and tax certificates) and `/procurement` (requisitions validated with the contract schema, purchase orders with goods received and amendments, vendors, assets, depreciation, renewals and deposits). Mocks follow the access-control matrix: an employee sees only themself, a manager their team, finance run totals without anyone else's pay. Shared mock helpers `actOn` and `withViewerAsync` check the body against the contract and step-up before answering. 11 new Playwright tests; 15 mock tests, which caught all 9 planted guard bugs.
+
 - **Phase 1 sprint F3.2, sales and tenders** in `apps/web`: `/crm` with the pipeline (move by stage, win, lose with a reason), forecast, leads (convert to client), clients (contacts, recent activity, overview), quotations (revisions kept, totals from the server, submit, email, record acceptance), contracts, the tender register (bid checklist per tender, outcome with rank and prices), bank guarantees with release and the standard documents. The sample finance and project-manager users now read sales, as the access-control matrix says; only partners act. 8 new Playwright tests; axe found one accessible-name mismatch, now fixed.
 
 - **Phase 1 sprint F3.1, projects** in `apps/web`: `/projects` (projects by role, my work, timesheets with submit) and `/projects/[id]` (value, cost, margin, progress and budget alert for those allowed to see money; milestones with sign-off and deadline changes that need a reason; task board with status changes and new tasks; team; budget, P&L and fee agreements). 12 new Playwright tests.
@@ -76,6 +78,7 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Security
 
+- New restricted field kind `personal-bank` for an employee's own bank account. It had shared the `bank` kind with vendor accounts, so Finance would have received employees' bank details, which the access-control matrix forbids.
 - Every mock reply now drops the restricted fields its viewer may not read, in `mocks/define.ts`, so a handler cannot leak one by forgetting. A record test found the project team handler sending billing rates to project managers before this change.
 
 ### Changed
