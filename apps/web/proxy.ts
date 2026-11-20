@@ -3,8 +3,18 @@ import type { NextRequest } from 'next/server';
 
 import { securityHeaders } from './lib/security/headers.ts';
 
-/** Pages open without a session. Everything else is denied by default. */
-const PUBLIC_PATHS = ['/login', '/two-factor', '/reset-password', '/session-expired'];
+/**
+ * Pages open without a session. Everything else is denied by default. Browsers fetch the
+ * manifest and icon without cookies, so they are public too; neither holds any data.
+ */
+const PUBLIC_PATHS = [
+  '/login',
+  '/two-factor',
+  '/reset-password',
+  '/session-expired',
+  '/manifest.webmanifest',
+  '/icon.svg',
+];
 const SESSION_COOKIE = '__Host-pf_session';
 
 function isPublic(pathname: string): boolean {

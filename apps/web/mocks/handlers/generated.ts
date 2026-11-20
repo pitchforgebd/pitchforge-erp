@@ -13,6 +13,7 @@ import { hrRecordHandlers } from './hr-records.ts';
 import { payrollRecordHandlers } from './payroll-records.ts';
 import { procurementRecordHandlers } from './procurement-records.ts';
 import { projectRecordHandlers } from './project-records.ts';
+import { reportingRecordHandlers } from './reporting-records.ts';
 
 const handled = new Set(
   [
@@ -25,6 +26,7 @@ const handled = new Set(
     ...hrRecordHandlers,
     ...payrollRecordHandlers,
     ...procurementRecordHandlers,
+    ...reportingRecordHandlers,
   ].map(({ endpointId }) => endpointId),
 );
 

@@ -68,3 +68,38 @@ test('the shell can be reached by keyboard', async ({ page }) => {
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/approvals$/);
 });
+
+/** Every section a partner can open, checked in both themes and at phone width (F5 pass). */
+const SECTIONS = [
+  '/home',
+  '/approvals',
+  '/billing',
+  '/finance',
+  '/ledger',
+  '/partners',
+  '/projects',
+  '/crm',
+  '/hr',
+  '/procurement',
+  '/reports',
+  '/audit',
+  '/admin',
+  '/account',
+  '/search',
+];
+
+for (const path of SECTIONS) {
+  test(`${path} has one heading, passes axe in both themes and fits 360 px`, async ({ page }) => {
+    // No colour transitions, so axe never measures a button halfway to the dark theme.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await signIn(page, 'farhana@pitchforge.example');
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+    expect(await axeViolations(page), 'light').toEqual([]);
+    await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+    expect(await axeViolations(page), 'dark').toEqual([]);
+    await page.setViewportSize({ width: 360, height: 780 });
+    expect(await hasNoSidewaysScroll(page)).toBe(true);
+  });
+}

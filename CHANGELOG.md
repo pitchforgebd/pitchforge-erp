@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F5, reports and finish** in `apps/web`: `/reports` with the profit and loss (and last year alongside), balance sheet and cash flow, each opening an account's ledger; the trial balance; 18 reports whose columns come from the server, with export; report schedules. The sample statements agree with each other, and a test checks it in poisha. The app installs from a manifest with four shortcuts and keeps no data on the device (ADR-0014, proposed). An accessibility pass checks every section for one heading, axe in light and dark, and 360 px. The Phase 1 sign-off checklist is in `docs/03-development-phases/phase-1-signoff.md`. 22 new Playwright tests.
+
 - **Phase 1 sprint F4, people and procurement** in `apps/web`: `/hr` (self-service check-in, leave and payslips, salary tax declaration; employees, attendance, leave; payroll runs with a start wizard, salary sheet, lock after step-up and bank file; salary structures, loans, final settlements and tax certificates) and `/procurement` (requisitions validated with the contract schema, purchase orders with goods received and amendments, vendors, assets, depreciation, renewals and deposits). Mocks follow the access-control matrix: an employee sees only themself, a manager their team, finance run totals without anyone else's pay. Shared mock helpers `actOn` and `withViewerAsync` check the body against the contract and step-up before answering. 11 new Playwright tests; 15 mock tests, which caught all 9 planted guard bugs.
 
 - **Phase 1 sprint F3.2, sales and tenders** in `apps/web`: `/crm` with the pipeline (move by stage, win, lose with a reason), forecast, leads (convert to client), clients (contacts, recent activity, overview), quotations (revisions kept, totals from the server, submit, email, record acceptance), contracts, the tender register (bid checklist per tender, outcome with rank and prices), bank guarantees with release and the standard documents. The sample finance and project-manager users now read sales, as the access-control matrix says; only partners act. 8 new Playwright tests; axe found one accessible-name mismatch, now fixed.
@@ -83,6 +85,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Changed
 
+- Transitions and animations are switched off for people who ask for reduced motion. The new dark-mode sweep had caught axe measuring a button halfway through its colour transition.
+- The section placeholder page is gone: every section now has its screens.
 - `.github/CODEOWNERS`: paths now follow the module template (`apps/api/src/modules/<name>/`); owners added for the shared kernel, contracts (two teams) and every guard-rail file.
 - API paths use `{id}:command` (`/vendor-bills/{id}:approve`) everywhere; `api-design.md` had one `:id:approve` example. Its contract example now matches the real code.
 - Document-number examples in `api-design.md` and `data-architecture.md` now use 5 digits (`BILL-2627-00187`, `JE-2627-00413`), per decision Q8.

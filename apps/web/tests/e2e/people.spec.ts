@@ -138,35 +138,35 @@ test('depreciation refuses a locked month and posts an open one', async ({ page 
   await expect(toast(page, 'Depreciation posted.')).toBeVisible();
 });
 
-test('the people and procurement screens pass axe and fit a phone', async ({ page }) => {
-  await signIn(page, PARTNER);
-  for (const [url, tabs] of [
+const AXE_PAGES = [
+  [
+    '/hr',
+    ['My HR', 'Employees', 'Attendance', 'Leave', 'Payroll', 'Payslips', 'Loans and settlements'],
+  ],
+  [
+    '/procurement',
     [
-      '/hr',
-      ['My HR', 'Employees', 'Attendance', 'Leave', 'Payroll', 'Payslips', 'Loans and settlements'],
+      'Requisitions',
+      'Purchase orders',
+      'Assets',
+      'Vendors',
+      'Depreciation',
+      'Renewals and deposits',
     ],
-    [
-      '/procurement',
-      [
-        'Requisitions',
-        'Purchase orders',
-        'Assets',
-        'Vendors',
-        'Depreciation',
-        'Renewals and deposits',
-      ],
-    ],
-  ] as const) {
+  ],
+] as const;
+
+for (const [url, tabs] of AXE_PAGES) {
+  test(`${url} passes axe on every tab and fits a phone`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await signIn(page, PARTNER);
     await page.goto(url);
     for (const tab of tabs) {
       await openTab(page, tab);
       await page.waitForLoadState('networkidle');
-      expect(await axeViolations(page), `${url} ${tab}`).toEqual([]);
+      expect(await axeViolations(page), tab).toEqual([]);
     }
-  }
-  await page.setViewportSize({ width: 360, height: 780 });
-  await page.goto('/hr');
-  expect(await hasNoSidewaysScroll(page)).toBe(true);
-  await page.goto('/procurement');
-  expect(await hasNoSidewaysScroll(page)).toBe(true);
-});
+    await page.setViewportSize({ width: 360, height: 780 });
+    expect(await hasNoSidewaysScroll(page)).toBe(true);
+  });
+}
