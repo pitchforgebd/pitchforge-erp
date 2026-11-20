@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F9, administration, files and the rest** in `apps/web`: user invitations, role assignment, deactivation with hand-over and sign-out everywhere; roles with grants and restricted fields, and cloning; approval rules; company details and logo; branches, departments and holidays; reminder rules; a contacts tab; data imports checked in a dry run first; bank statement import; attachments on bills, invoices, employees and tenders; PDFs of invoices, payslips, purchase orders and client statements; marking notifications read; notification preferences; delegating an approval; and the page a password reset link opens. Uploads use signed URLs; in mock mode the BFF serves stand-in storage on the same origin, so the strict CSP stays as it is. 10 new Playwright tests.
+
 - **Phase 1 sprint F8, people and purchasing forms** in `apps/web`: 22 forms for employees (details, protected details after step-up, lifecycle events), attendance corrections, shifts, leave types, salary structures, advances and loans, final settlements, vendors, purchase orders, assets and their assignment, licences and deposits. Edits of NID, TIN and bank details leave out empty fields, so the stored value is kept rather than cleared. 8 new Playwright tests.
 
 - **Phase 1 sprint F7, sales and project forms** in `apps/web`: 28 forms on `FormDialog` for leads, clients, contacts, activity, deals, pipeline stages, quotations, contracts, tenders, the bid checklist, awards, guarantees, projects and their status, team, budget versions, milestones, fee agreements, task comments and timesheets. New leads and clients show possible duplicates as the name is typed. `FormDialog` gained date-and-time fields (typed in Dhaka time, sent as UTC) and hidden fields. `@pitchforge/shared-kernel` gained `fromDhakaWallClock` and `toDhakaWallClock`, read from the time-zone database. 9 new Playwright tests; axe found two status buttons (project and cheque) whose accessible name did not contain their visible text, now fixed.
@@ -86,6 +88,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Security
 
+- Password reset links carry their token in the URL fragment, which is never sent to a server or a Referer, and the page removes it from the address bar on arrival.
+- The stand-in storage for mock mode answers only in mock mode and only with a session; uploads must come from the same origin and stay under the contract's size limit.
 - Mock writes are denied by default: every write without a hand-written handler needs a role listed in `mocks/data/write-access.ts`, after step-up where the contract asks for it. Before, any signed-in user got a sample answer. A test fails if the table and the endpoints drift apart, and planting a missing role check fails 78 tests.
 - The date picker no longer puts `aria-required` on its button, which axe flagged on the new forms.
 - New restricted field kind `personal-bank` for an employee's own bank account. It had shared the `bank` kind with vendor accounts, so Finance would have received employees' bank details, which the access-control matrix forbids.

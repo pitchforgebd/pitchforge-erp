@@ -31,6 +31,8 @@ import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { DelegateButton } from './delegate.tsx';
+
 export const STATUS_TONE: Readonly<Record<ApprovalStatus, Tone>> = {
   pending: 'info',
   approved: 'good',
@@ -279,6 +281,7 @@ function Review({
         )}
         {reasonFor === null ? (
           <>
+            {can('delegate') && <DelegateButton approval={approval} />}
             {can('return') && (
               <Button
                 variant="secondary"

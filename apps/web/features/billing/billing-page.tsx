@@ -30,6 +30,7 @@ import type { Tone } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { PdfButton, RecordFiles } from '../common/files.tsx';
 import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
@@ -99,6 +100,12 @@ function InvoiceDialog({
       closeLabel={common('close')}
       footer={
         <>
+          {invoice.number !== null && (
+            <PdfButton
+              template="invoice"
+              record={{ recordType: 'sales_invoice', recordId: invoice.id }}
+            />
+          )}
           <EditInvoiceButton invoice={invoice} />
           {invoice.allowedActions.includes('send_reminder') && (
             <Button
@@ -159,6 +166,10 @@ function InvoiceDialog({
           ]}
         />
         <p className="text-xs text-muted">{t('totalsByServer')}</p>
+        <RecordFiles
+          record={{ recordType: 'sales_invoice', recordId: invoice.id }}
+          canAttach={invoice.allowedActions.includes('update')}
+        />
       </div>
     </Dialog>
   );
@@ -663,7 +674,12 @@ function StatementDialog({
       title={t('statementOf', { name: party.name })}
       closeLabel={common('close')}
     >
-      <QueryView query={statement}>{(data) => <StatementTable statement={data} />}</QueryView>
+      <div className="flex flex-col gap-3">
+        <QueryView query={statement}>{(data) => <StatementTable statement={data} />}</QueryView>
+        <span>
+          <PdfButton template="statement" record={{ recordType: 'client', recordId: party.id }} />
+        </span>
+      </div>
     </Dialog>
   );
 }

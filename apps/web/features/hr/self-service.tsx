@@ -23,6 +23,7 @@ import {
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { PdfButton } from '../common/files.tsx';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
@@ -305,6 +306,12 @@ function PayslipDialog({
               ],
             ]}
           />
+          <span>
+            <PdfButton
+              template="payslip"
+              record={{ recordType: 'payslip', recordId: payslip.id }}
+            />
+          </span>
         </div>
       )}
     </Dialog>

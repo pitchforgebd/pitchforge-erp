@@ -24,6 +24,7 @@ import type { Tone } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { RecordFiles } from '../common/files.tsx';
 import { Card } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
 import { useSession } from '../common/session.tsx';
@@ -229,6 +230,10 @@ function EmployeeDialog({
               </Button>
             </div>
           ))}
+        <RecordFiles
+          record={{ recordType: 'employee', recordId: employee.id }}
+          canAttach={employee.allowedActions.includes('update')}
+        />
       </div>
     </Dialog>
   );

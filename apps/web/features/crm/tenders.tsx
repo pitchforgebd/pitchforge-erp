@@ -23,6 +23,7 @@ import type { Tone } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { RecordFiles } from '../common/files.tsx';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Details, RecordTable } from '../common/record-table.tsx';
 import { QueryView } from '../common/states.tsx';
@@ -35,6 +36,7 @@ import {
   EditChecklistButton,
   EditTenderButton,
   NewGuaranteeButton,
+  NewStandardDocumentButton,
   NewTenderButton,
 } from './forms.tsx';
 
@@ -235,6 +237,10 @@ function TenderDialog({
               </Button>
             </div>
           ))}
+        <RecordFiles
+          record={{ recordType: 'tender', recordId: tender.id }}
+          canAttach={tender.allowedActions.includes('update')}
+        />
       </div>
     </Dialog>
   );
@@ -311,6 +317,8 @@ export function GuaranteesTab(): ReactNode {
   const message = useErrorMessage();
   const guarantees = useList(crm.listGuarantees, {});
   const documents = useList(crm.listStandardDocuments, {});
+  // Only those who may release guarantees run the sales side.
+  const canAdd = guarantees.items.some((row) => row.allowedActions.length > 0);
   const release = useCommand(
     (guarantee: Guarantee) =>
       browserCall(crm.releaseGuarantee, {
@@ -380,7 +388,12 @@ export function GuaranteesTab(): ReactNode {
         label={t('documents')}
         list={documents}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('documents')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('documents')}</p>
+            {canAdd && <NewStandardDocumentButton />}
+          </div>
+        }
         columns={[
           { id: 'name', header: t('document'), cell: (row) => row.name },
           {

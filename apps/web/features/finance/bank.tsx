@@ -39,6 +39,7 @@ import { useList } from '../common/use-list.ts';
 
 import {
   AdvanceActions,
+  ImportStatementButton,
   ChequeStatusButton,
   EditBankAccountButton,
   NewAdvanceButton,
@@ -391,21 +392,24 @@ export function ReconciliationTab(): ReactNode {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="max-w-sm">
-        <Field label={t('bankAccount')}>
-          {(control) => (
-            <Select
-              {...control}
-              value={bankId}
-              options={banks.items
-                .filter((bank) => bank.kind === 'bank')
-                .map((bank) => ({ value: bank.id, label: bank.name }))}
-              onChange={(event) => {
-                setChosen(event.target.value);
-              }}
-            />
-          )}
-        </Field>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="max-w-sm flex-1">
+          <Field label={t('bankAccount')}>
+            {(control) => (
+              <Select
+                {...control}
+                value={bankId}
+                options={banks.items
+                  .filter((bank) => bank.kind === 'bank')
+                  .map((bank) => ({ value: bank.id, label: bank.name }))}
+                onChange={(event) => {
+                  setChosen(event.target.value);
+                }}
+              />
+            )}
+          </Field>
+        </div>
+        <ImportStatementButton />
       </div>
       {bankId !== '' && (
         <QueryView query={summary}>

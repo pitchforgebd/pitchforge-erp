@@ -17,11 +17,7 @@ export const WRITE_ACCESS: ReadonlyMap<string, readonly SampleRole[]> = new Map(
   ['core.revokeMySession', EVERYONE],
   ['core.markAllNotificationsRead', EVERYONE],
   ['core.updateNotificationPreferences', EVERYONE],
-  ['core.createUpload', EVERYONE],
-  ['core.completeUpload', EVERYONE],
-  ['core.createDownload', EVERYONE],
   ['core.startExport', EVERYONE],
-  ['core.renderDocument', EVERYONE],
 
   /* Settings and people: Partners. Contacts and imports: the books. */
   ['core.updateCompany', PARTNER],
@@ -41,8 +37,6 @@ export const WRITE_ACCESS: ReadonlyMap<string, readonly SampleRole[]> = new Map(
   ['core.updateReminderRule', PARTNER],
   ['core.createContact', BOOKS],
   ['core.updateContact', BOOKS],
-  ['core.startImport', BOOKS],
-  ['core.commitImport', BOOKS],
 
   /* Accounting: Partners and finance. Anyone claims expenses and asks for an advance. */
   ['accounting.createAccount', BOOKS],
@@ -62,7 +56,6 @@ export const WRITE_ACCESS: ReadonlyMap<string, readonly SampleRole[]> = new Map(
   ['accounting.createBankAccount', BOOKS],
   ['accounting.updateBankAccount', BOOKS],
   ['accounting.createTransfer', BOOKS],
-  ['accounting.importBankStatement', BOOKS],
   ['accounting.createCheque', BOOKS],
   ['accounting.setChequeStatus', BOOKS],
   ['accounting.createExchangeRate', BOOKS],

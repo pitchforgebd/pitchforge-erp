@@ -14,6 +14,25 @@ import { QueryView } from '../common/states.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  DeleteHolidayButton,
+  EditApprovalRuleButton,
+  EditCompanyButton,
+  EditContactButton,
+  EditOrgUnitButton,
+  EditReminderButton,
+  ImportButton,
+  InviteUserButton,
+  LogoUpload,
+  NewApprovalRuleButton,
+  NewContactButton,
+  NewHolidayButton,
+  NewOrgUnitButton,
+  NewRoleButton,
+  RoleActions,
+  UserActions,
+} from './forms.tsx';
+
 function Users(): ReactNode {
   const t = useTranslations('admin');
   const status = useTranslations('admin.userStatus');
@@ -25,6 +44,11 @@ function Users(): ReactNode {
       label={t('users')}
       list={users}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap justify-end gap-2">
+          <InviteUserButton />
+        </div>
+      }
       columns={[
         {
           id: 'name',
@@ -80,6 +104,7 @@ function Users(): ReactNode {
           cell: (row) =>
             row.lastLoginAt === null ? t('never') : <TimeText value={row.lastLoginAt} />,
         },
+        { id: 'actions', header: '', align: 'right', cell: (row) => <UserActions user={row} /> },
       ]}
     />
   );
@@ -94,6 +119,11 @@ function Roles(): ReactNode {
       label={t('roles')}
       list={roles}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap justify-end gap-2">
+          <NewRoleButton />
+        </div>
+      }
       columns={[
         {
           id: 'name',
@@ -142,6 +172,7 @@ function Roles(): ReactNode {
               </span>
             ),
         },
+        { id: 'actions', header: '', align: 'right', cell: (row) => <RoleActions role={row} /> },
       ]}
     />
   );
@@ -158,6 +189,11 @@ function Rules(): ReactNode {
       label={t('rules')}
       list={rules}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap justify-end gap-2">
+          <NewApprovalRuleButton />
+        </div>
+      }
       columns={[
         {
           id: 'name',
@@ -207,6 +243,12 @@ function Rules(): ReactNode {
             </StatusPill>
           ),
         },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditApprovalRuleButton rule={row} />,
+        },
       ]}
     />
   );
@@ -237,6 +279,12 @@ function CompanySettings(): ReactNode {
             <dd>
               {data.fiscalYearStartMonth === 7 ? t('july') : String(data.fiscalYearStartMonth)}
             </dd>
+            <dd className="flex flex-col gap-3 sm:col-span-2">
+              <span>
+                <EditCompanyButton company={data} />
+              </span>
+              <LogoUpload company={data} />
+            </dd>
           </dl>
         )}
       </QueryView>
@@ -253,10 +301,21 @@ function OrgUnits(): ReactNode {
       label={t('orgUnits')}
       list={units}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap justify-end gap-2">
+          <NewOrgUnitButton />
+        </div>
+      }
       columns={[
         { id: 'code', header: t('code'), cell: (row) => <Tag>{row.code}</Tag> },
         { id: 'name', header: t('name'), cell: (row) => row.name },
         { id: 'type', header: t('type'), cell: (row) => types(row.type) },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditOrgUnitButton unit={row} />,
+        },
       ]}
     />
   );
@@ -270,9 +329,20 @@ function Holidays(): ReactNode {
       label={t('holidays')}
       list={holidays}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap justify-end gap-2">
+          <NewHolidayButton />
+        </div>
+      }
       columns={[
         { id: 'date', header: t('date'), cell: (row) => <DateText value={row.date} /> },
         { id: 'name', header: t('name'), cell: (row) => row.name },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <DeleteHolidayButton holiday={row} />,
+        },
       ]}
     />
   );
@@ -313,6 +383,48 @@ function Numbering(): ReactNode {
   );
 }
 
+function Contacts(): ReactNode {
+  const t = useTranslations('admin');
+  const contacts = useList(core.listContacts, {});
+  return (
+    <RecordTable
+      label={t('contacts')}
+      list={contacts}
+      getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs text-muted">{t('contactsHint')}</p>
+          <span className="flex flex-wrap gap-2">
+            <ImportButton />
+            <NewContactButton />
+          </span>
+        </div>
+      }
+      columns={[
+        { id: 'name', header: t('name'), cell: (row) => row.name },
+        {
+          id: 'kinds',
+          header: t('type'),
+          cell: (row) => (
+            <span className="flex flex-wrap gap-1">
+              {row.kinds.map((kind) => (
+                <Tag key={kind}>{kind}</Tag>
+              ))}
+            </span>
+          ),
+        },
+        { id: 'email', header: t('email'), cell: (row) => row.email ?? '—' },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditContactButton contact={row} />,
+        },
+      ]}
+    />
+  );
+}
+
 function Reminders(): ReactNode {
   const t = useTranslations('admin');
   const rules = useList(core.listReminderRules, {});
@@ -324,6 +436,12 @@ function Reminders(): ReactNode {
       columns={[
         { id: 'subject', header: t('subject'), cell: (row) => row.subject },
         { id: 'days', header: t('daysBefore'), cell: (row) => row.daysBefore.join(', ') },
+        {
+          id: 'edit',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditReminderButton rule={row} />,
+        },
         {
           id: 'active',
           header: t('status'),
@@ -354,6 +472,7 @@ export function AdminPage(): ReactNode {
           { value: 'holidays', label: t('holidays'), content: <Holidays /> },
           { value: 'numbering', label: t('numbering'), content: <Numbering /> },
           { value: 'reminders', label: t('reminders'), content: <Reminders /> },
+          { value: 'contacts', label: t('contacts'), content: <Contacts /> },
         ]}
       />
     </>

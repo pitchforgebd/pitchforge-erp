@@ -83,7 +83,17 @@
     "submit": "Send the link",
     "sentTitle": "Check your email",
     "sentDescription": "If that address has an account, a reset link is on its way.",
-    "backToLogin": "Back to sign in"
+    "backToLogin": "Back to sign in",
+    "newTitle": "Choose a new password",
+    "newDescription": "Every device signed in to your account is signed out when you save it.",
+    "newPassword": "New password",
+    "confirmPassword": "Type it again",
+    "passwordRules": "At least 12 characters.",
+    "passwordInvalid": "Use at least 12 characters.",
+    "passwordsDiffer": "The two passwords are not the same.",
+    "setPassword": "Save the new password",
+    "doneTitle": "Password changed",
+    "doneDescription": "Sign in with your new password."
   },
   "sessionExpired": {
     "title": "Your session has ended",
@@ -135,7 +145,10 @@
   "notifications": {
     "loading": "Loading notifications…",
     "emptyTitle": "You are all caught up",
-    "errorTitle": "Could not load notifications"
+    "errorTitle": "Could not load notifications",
+    "markRead": "Mark read",
+    "markReadLabel": "Mark read: {title}",
+    "markAllRead": "Mark all read"
   },
   "notFound": {
     "title": "Page not found",
@@ -198,7 +211,15 @@
     "newPassword": "New password",
     "newPasswordInvalid": "Use at least 12 characters.",
     "changePassword": "Change password",
-    "passwordChanged": "Your password is changed."
+    "passwordChanged": "Your password is changed.",
+    "notifications": "Notifications",
+    "notificationsDescription": "How you hear about approvals, reminders and deadlines.",
+    "preferencesSaved": "Preferences saved.",
+    "channels": {
+      "email": "Email",
+      "push": "Push notifications",
+      "dailyDigest": "One daily summary instead of each message"
+    }
   },
   "approvals": {
     "title": "Approvals",
@@ -367,7 +388,9 @@
     "gapFree": "Gap-free",
     "subject": "Reminder",
     "daysBefore": "Days before",
-    "usersEmpty": "No users yet."
+    "usersEmpty": "No users yet.",
+    "contacts": "Contacts",
+    "contactsHint": "The shared list of clients, vendors and others; bank and tax details change after step-up."
   },
   "finance": {
     "title": "Payables and bank",
@@ -1742,7 +1765,35 @@
       "cost": "Cost",
       "annualRate": "Yearly rate",
       "renewsOn": "Renews on",
-      "givenOn": "Given on"
+      "givenOn": "Given on",
+      "roles": "Roles",
+      "accessExpires": "Access ends",
+      "delegate": "Hand over to",
+      "grants": "Grants",
+      "area": "Area",
+      "actions": "Actions",
+      "scope": "Records",
+      "restrictedFields": "Restricted fields it may read",
+      "field": "Field",
+      "newName": "New name",
+      "minAmount": "From amount",
+      "maxAmount": "Up to amount",
+      "approvers": "Approvers",
+      "mode": "How they decide",
+      "slaHours": "Answer within (hours)",
+      "legalName": "Legal name",
+      "licenceNo": "Trade licence number",
+      "logo": "Logo (PNG or JPEG)",
+      "parentUnit": "Belongs to",
+      "branch": "Branch",
+      "daysBefore": "Days before",
+      "days": "Days",
+      "contactKinds": "Kinds",
+      "importType": "What to import",
+      "row": "Row",
+      "column": "Column",
+      "problem": "Problem",
+      "statementFile": "Statement file"
     },
     "possibleDuplicates": "Possible duplicates",
     "recordTypes": {
@@ -1842,6 +1893,117 @@
       "wed": "Wednesday",
       "thu": "Thursday",
       "fri": "Friday"
+    },
+    "inviteUser": "Invite a user",
+    "inviteHint": "They get an email to set a password and turn on two-step sign-in.",
+    "invite": "Invite",
+    "invited": "Invitation sent.",
+    "addRole": "Add a role",
+    "accessExpiresHint": "For auditors and short-term access: sign-in stops at this time.",
+    "roles": "Roles",
+    "rolesOf": "Roles of {name}",
+    "signOut": "Sign out everywhere",
+    "signOutLabel": "Sign out everywhere: {name}",
+    "signedOut": "Signed out of every device.",
+    "deactivate": "Deactivate",
+    "deactivateLabel": "Deactivate {name}",
+    "deactivateHint": "Their pending approvals move to the person you choose; history is kept.",
+    "deactivated": "User deactivated.",
+    "newRole": "New role",
+    "grantsHint": "A grant is an area, the actions (comma-separated: read, create, update, submit, approve, delete) and the records it covers.",
+    "addGrant": "Add a grant",
+    "addField": "Add a field",
+    "clone": "Clone",
+    "cloneLabel": "Clone {name}",
+    "copyOf": "Copy of {name}",
+    "newApprovalRule": "New approval rule",
+    "editCompany": "Edit company details",
+    "logoSaved": "Logo saved.",
+    "uploadLogo": "Upload logo",
+    "newOrgUnit": "New branch or department",
+    "newHoliday": "New holiday",
+    "allBranches": "Leave empty for every branch.",
+    "removeLabel": "Remove {name}",
+    "removed": "Removed.",
+    "addKind": "Add a kind",
+    "newContact": "New contact",
+    "importData": "Import data",
+    "importHint": "The file is checked first; nothing is changed until you import.",
+    "checkFile": "Check the file",
+    "checkResult": "{rows} rows, {errors} with problems",
+    "errorsSkipped": "Rows with problems are left out; fix them and import again.",
+    "rowErrors": "Rows with problems",
+    "importRows": "Import {count} rows",
+    "imported": "Import started; the rows appear when it finishes.",
+    "import": "Import",
+    "importStatement": "Import statement",
+    "importStatementHint": "A CSV or Excel file from the bank; lines are matched afterwards.",
+    "statementImported": "Statement imported; its lines appear when it has been read.",
+    "newStandardDocument": "Add a document",
+    "standardDocumentHint": "Trade licence, TIN and similar papers reused in every tender.",
+    "delegate": "Delegate",
+    "delegateTitle": "Delegate this approval",
+    "delegateHint": "They decide in your place; the history shows both of you.",
+    "delegated": "Delegated.",
+    "scopes": {
+      "own": "Their own",
+      "team": "Their team",
+      "department": "Their department",
+      "project": "Their projects",
+      "all": "Everything"
+    },
+    "restrictedKinds": {
+      "salary": "Salary",
+      "bank": "Vendor and company bank",
+      "personal-bank": "Personal bank account",
+      "nid": "NID",
+      "tin": "TIN",
+      "partner-balance": "Partner balances",
+      "labour-cost": "Labour cost"
+    },
+    "modes": {
+      "any": "Any one approver",
+      "all": "All approvers",
+      "sequence": "One after another"
+    },
+    "unitTypes": {
+      "branch": "Branch",
+      "department": "Department",
+      "cost_center": "Cost centre"
+    },
+    "contactKinds": {
+      "client": "Client",
+      "vendor": "Vendor",
+      "employee": "Employee",
+      "partner": "Partner",
+      "other": "Other"
+    },
+    "importTypes": {
+      "chart_of_accounts": "Chart of accounts",
+      "opening_balances": "Opening balances",
+      "contacts": "Contacts",
+      "employees": "Employees",
+      "bank_statement": "Bank statement",
+      "attendance": "Attendance"
+    }
+  },
+  "files": {
+    "attachments": "Attachments",
+    "none": "Nothing attached.",
+    "open": "Open",
+    "openLabel": "Open {name}",
+    "attach": "Attach a file",
+    "upload": "Upload",
+    "attached": "File attached; it is checked for viruses before anyone can open it.",
+    "wrongType": "Only PDF, JPEG, PNG, CSV, Excel and Word files can be attached.",
+    "tooLarge": "The file is larger than {megabytes} MB.",
+    "limits": "PDF, images, CSV, Excel or Word, up to {megabytes} MB.",
+    "pdf": "Download PDF",
+    "status": {
+      "pending_upload": "Uploading",
+      "scanning": "Being checked",
+      "clean": "Ready",
+      "infected": "Blocked: virus found"
     }
   }
 }

@@ -3,6 +3,7 @@ import type { Endpoint, ErrorCode, Problem } from '@pitchforge/contracts';
 
 import { serverConfig } from '../config/env.ts';
 
+import { publicOrigin, withLocalStorageLinks } from './mock-storage.ts';
 import { matchEndpoint } from './routes.ts';
 
 /** Only these request headers reach the API. */
@@ -85,6 +86,16 @@ export async function forwardToApi(
 
   if (await contractViolation(endpoint, upstream)) {
     return problem('VALIDATION', `Response of ${endpoint.id} breaks its contract`);
+  }
+
+  // Mock mode only: signed storage links point at the stand-in storage on this origin.
+  if (
+    serverConfig().apiMode === 'mock' &&
+    upstream.ok &&
+    (endpoint.id === 'core.createUpload' || endpoint.id === 'core.createDownload')
+  ) {
+    const body = withLocalStorageLinks(await upstream.json(), publicOrigin(request));
+    return Response.json(body, { status: upstream.status });
   }
 
   const responseHeaders = new Headers();

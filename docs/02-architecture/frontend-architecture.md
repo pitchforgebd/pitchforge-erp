@@ -58,3 +58,5 @@ flowchart LR
 3. No secrets in `NEXT_PUBLIC_*` variables. Build fails if a known secret pattern appears in the bundle.
 4. Sensitive fields (salary, bank, NID) are never fetched for roles without the permission; the API omits them, the UI does not just hide them.
 5. Downloads use short-lived signed URLs from the API.
+6. Uploads go straight to storage through a signed URL from `core.createUpload`, then `core.completeUpload` starts the virus scan. Type and size are checked against the contract first. In Phase 2 the storage origin must be added to `connect-src` in the CSP. In mock mode the BFF points the signed links at `/bff/mock-storage` on the app's own origin, which accepts an upload and forgets it and serves one sample PDF (`lib/api/mock-storage.ts`).
+7. A password reset link carries its token in the URL fragment (`/reset-password#token=…`), which browsers never send to a server or a Referer; the page wipes it from the address bar on arrival. The Phase 2 email must build the link this way.

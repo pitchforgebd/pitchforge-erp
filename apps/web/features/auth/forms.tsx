@@ -5,7 +5,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import type { ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
@@ -15,6 +15,7 @@ import {
   LoginRequest,
   RequestPasswordReset,
   coreEndpoints as core,
+  ResetPassword,
 } from '@pitchforge/contracts';
 import type { VerifyTwoFactorRequest } from '@pitchforge/contracts';
 import { Button, Callout, Field, Input } from '@pitchforge/ui';
@@ -297,6 +298,108 @@ export function ResetRequestForm(): ReactNode {
       <Link href="/login" className="text-center text-sm text-accent underline">
         {t('backToLogin')}
       </Link>
+    </form>
+  );
+}
+
+/**
+ * The page a reset email opens. The token comes in the URL fragment (#token=…), which browsers
+ * never send to a server or put in a Referer, and it is wiped from the address bar on arrival.
+ */
+export function ResetPasswordScreen(): ReactNode {
+  const fromLink = useSyncExternalStore(noChanges, readResetToken, () => undefined);
+  useEffect(() => {
+    if (typeof fromLink === 'string') {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+    return () => {
+      captured = undefined;
+    };
+  }, [fromLink]);
+  if (fromLink === undefined) return null;
+  return fromLink === null ? <ResetRequestForm /> : <NewPasswordForm token={fromLink} />;
+}
+
+/** Read once per visit, before the fragment is wiped; forgotten when the screen closes. */
+let captured: string | null | undefined;
+function readResetToken(): string | null {
+  captured ??= new URLSearchParams(window.location.hash.slice(1)).get('token');
+  return captured;
+}
+const noChanges = () => () => undefined;
+
+function NewPasswordForm({ token }: { readonly token: string }): ReactNode {
+  const t = useTranslations('reset');
+  const [confirm, setConfirm] = useState('');
+  const form = useForm<z.input<typeof ResetPassword>>({
+    resolver: zodResolver(ResetPassword),
+    defaultValues: { token, newPassword: '' },
+  });
+  const reset = useMutation({
+    mutationFn: (body: z.input<typeof ResetPassword>) => browserCall(core.resetPassword, { body }),
+  });
+  const [mismatch, setMismatch] = useState(false);
+
+  if (reset.isSuccess) {
+    return (
+      <div className="flex flex-col gap-3">
+        <Callout tone="good" title={t('doneTitle')}>
+          {t('doneDescription')}
+        </Callout>
+        <Link href="/login" className="text-center text-sm text-accent underline">
+          {t('backToLogin')}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      noValidate
+      className="flex flex-col gap-4"
+      onSubmit={(event) => {
+        void form.handleSubmit((values) => {
+          const same = confirm === values.newPassword;
+          setMismatch(!same);
+          if (same) reset.mutate(values);
+        })(event);
+      }}
+    >
+      <div>
+        <h1 className="text-lg font-semibold">{t('newTitle')}</h1>
+        <p className="text-sm text-muted">{t('newDescription')}</p>
+      </div>
+      <FormError error={reset.error} />
+      <Field
+        label={t('newPassword')}
+        hint={t('passwordRules')}
+        {...(form.formState.errors.newPassword && { error: t('passwordInvalid') })}
+      >
+        {(control) => (
+          <Input
+            {...control}
+            {...form.register('newPassword')}
+            type="password"
+            autoComplete="new-password"
+          />
+        )}
+      </Field>
+      <Field label={t('confirmPassword')} {...(mismatch && { error: t('passwordsDiffer') })}>
+        {(control) => (
+          <Input
+            {...control}
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(event) => {
+              setConfirm(event.target.value);
+            }}
+          />
+        )}
+      </Field>
+      <Button type="submit" loading={reset.isPending}>
+        {t('setPassword')}
+      </Button>
     </form>
   );
 }

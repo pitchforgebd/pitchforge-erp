@@ -158,6 +158,8 @@ const AXE_PAGES = [
 
 for (const [url, tabs] of AXE_PAGES) {
   test(`${url} passes axe on every tab and fits a phone`, async ({ page }) => {
+    // Six or seven tabs, each checked by axe: allow for a busy machine.
+    test.setTimeout(120_000);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await signIn(page, PARTNER);
     await page.goto(url);

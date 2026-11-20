@@ -13,6 +13,7 @@ import { SESSION_COOKIE, coreHandlers } from './core.ts';
 import { crmRecordHandlers } from './crm-records.ts';
 import { hrRecordHandlers } from './hr-records.ts';
 import { payrollRecordHandlers } from './payroll-records.ts';
+import { platformRecordHandlers } from './platform-records.ts';
 import { procurementRecordHandlers } from './procurement-records.ts';
 import { projectRecordHandlers } from './project-records.ts';
 import { reportingRecordHandlers } from './reporting-records.ts';
@@ -28,6 +29,7 @@ const handled = new Set(
     ...hrRecordHandlers,
     ...payrollRecordHandlers,
     ...procurementRecordHandlers,
+    ...platformRecordHandlers,
     ...reportingRecordHandlers,
   ].map(({ endpointId }) => endpointId),
 );

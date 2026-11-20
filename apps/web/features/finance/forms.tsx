@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import {
@@ -28,10 +29,11 @@ import type {
   PaymentRun,
   VendorBill,
 } from '@pitchforge/contracts';
-import { Button, Callout } from '@pitchforge/ui';
+import { Button, Callout, Dialog, Field, Select } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { FilePicker, uploadFile, useUploadError } from '../common/files.tsx';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
@@ -660,5 +662,102 @@ export function EditRunButton({ run }: { readonly run: PaymentRun }): ReactNode 
         />
       )}
     </DialogButton>
+  );
+}
+
+/* Bank statement import --------------------------------------------------------------------- */
+
+export function ImportStatementButton(): ReactNode {
+  const t = useTranslations('forms');
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        {t('importStatement')}
+      </Button>
+      {open && (
+        <ImportStatementDialog
+          onClose={() => {
+            setOpen(false);
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function ImportStatementDialog({ onClose }: { readonly onClose: () => void }): ReactNode {
+  const t = useTranslations('forms');
+  const common = useTranslations('common');
+  const uploadError = useUploadError();
+  const banks = useBankOptions();
+  const [bankAccountId, setBank] = useState('');
+  const [picked, setPicked] = useState<File | null>(null);
+  const run = useCommand(
+    async (file: File) => {
+      const stored = await uploadFile(file, null);
+      return browserCall(accounting.importBankStatement, {
+        body: { bankAccountId, fileId: stored.id },
+      });
+    },
+    {
+      success: t('statementImported'),
+      invalidate: [accounting.listStatementLines.id],
+      onSuccess: onClose,
+    },
+  );
+  return (
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={t('importStatement')}
+      description={t('importStatementHint')}
+      closeLabel={common('close')}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            {common('cancel')}
+          </Button>
+          <Button
+            loading={run.isPending}
+            disabled={picked === null || bankAccountId === ''}
+            onClick={() => {
+              if (picked !== null) run.mutate(picked);
+            }}
+          >
+            {t('import')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {run.isError && <Callout tone="crit" title={uploadError(run.error)} />}
+        <Field label={t('fields.bankAccount')} required requiredLabel={common('required')}>
+          {(control) => (
+            <Select
+              {...control}
+              value={bankAccountId}
+              placeholder={t('choose')}
+              options={banks}
+              onChange={(event) => {
+                setBank(event.target.value);
+              }}
+            />
+          )}
+        </Field>
+        <FilePicker
+          label={t('fields.statementFile')}
+          accept="text/csv,.csv,.xlsx"
+          onPick={setPicked}
+        />
+      </div>
+    </Dialog>
   );
 }

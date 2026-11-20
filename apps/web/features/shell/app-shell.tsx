@@ -1,6 +1,6 @@
 'use client';
 
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Bell, LogOut, Menu, Search, UserRound } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -69,6 +69,20 @@ function NotificationsDialog({
     queryFn: () => browserCall(core.listNotifications, { query: {} }),
     enabled: open,
   });
+  const queryClient = useQueryClient();
+  const refresh = () => {
+    void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+  };
+  // No step-up is ever needed here, so plain mutations rather than useCommand.
+  const markRead = useMutation({
+    mutationFn: (id: string) => browserCall(core.markNotificationRead, { params: { id } }),
+    onSuccess: refresh,
+  });
+  const markAll = useMutation({
+    mutationFn: () => browserCall(core.markAllNotificationsRead, {}),
+    onSuccess: refresh,
+  });
+  const unread = notifications.data?.items.some((item) => item.readAt === null) === true;
 
   let body: ReactNode;
   if (notifications.isPending) {
@@ -81,9 +95,29 @@ function NotificationsDialog({
     body = (
       <ul className="flex flex-col gap-3">
         {notifications.data.items.map((item) => (
-          <li key={item.id} className={cn(item.readAt === null && 'font-medium')}>
-            <p className="text-sm">{item.title}</p>
-            <p className="text-xs font-normal text-muted">{item.body}</p>
+          <li
+            key={item.id}
+            className={cn(
+              'flex items-start justify-between gap-3',
+              item.readAt === null && 'font-medium',
+            )}
+          >
+            <span>
+              <p className="text-sm">{item.title}</p>
+              <p className="text-xs font-normal text-muted">{item.body}</p>
+            </span>
+            {item.readAt === null && (
+              <Button
+                size="sm"
+                variant="ghost"
+                aria-label={t('markReadLabel', { title: item.title })}
+                onClick={() => {
+                  markRead.mutate(item.id);
+                }}
+              >
+                {t('markRead')}
+              </Button>
+            )}
           </li>
         ))}
       </ul>
@@ -96,6 +130,19 @@ function NotificationsDialog({
       onOpenChange={onOpenChange}
       title={common('notifications')}
       closeLabel={common('close')}
+      {...(unread && {
+        footer: (
+          <Button
+            variant="secondary"
+            loading={markAll.isPending}
+            onClick={() => {
+              markAll.mutate();
+            }}
+          >
+            {t('markAllRead')}
+          </Button>
+        ),
+      })}
     >
       {body}
     </Dialog>

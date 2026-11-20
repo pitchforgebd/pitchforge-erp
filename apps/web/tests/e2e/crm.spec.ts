@@ -91,6 +91,8 @@ test('finance reads guarantees but cannot release them', async ({ page }) => {
 });
 
 test('the sales screens pass axe and fit a phone', async ({ page }) => {
+  // Six tabs, each checked by axe: allow for a busy machine.
+  test.setTimeout(120_000);
   await signIn(page, PARTNER);
   await page.goto('/crm');
   await expect(page.getByRole('region', { name: 'Negotiation' })).toBeVisible();

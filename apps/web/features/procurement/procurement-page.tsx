@@ -22,6 +22,7 @@ import {
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { PdfButton } from '../common/files.tsx';
 import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
@@ -306,6 +307,12 @@ function OrderDialog({
       closeLabel={common('close')}
       footer={
         <>
+          {order.number !== null && (
+            <PdfButton
+              template="purchase_order"
+              record={{ recordType: 'purchase_order', recordId: order.id }}
+            />
+          )}
           <EditOrderButton order={order} />
           {order.allowedActions.includes('amend') && (
             <Button

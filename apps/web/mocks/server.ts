@@ -9,6 +9,7 @@ import { crmRecordHandlers } from './handlers/crm-records.ts';
 import { generatedHandlers } from './handlers/generated.ts';
 import { hrRecordHandlers } from './handlers/hr-records.ts';
 import { payrollRecordHandlers } from './handlers/payroll-records.ts';
+import { platformRecordHandlers } from './handlers/platform-records.ts';
 import { procurementRecordHandlers } from './handlers/procurement-records.ts';
 import { projectRecordHandlers } from './handlers/project-records.ts';
 import { reportingRecordHandlers } from './handlers/reporting-records.ts';
@@ -25,6 +26,7 @@ export function mockHandlers(realModules: readonly string[]) {
     ...hrRecordHandlers,
     ...payrollRecordHandlers,
     ...procurementRecordHandlers,
+    ...platformRecordHandlers,
     ...reportingRecordHandlers,
     ...generatedHandlers,
   ]

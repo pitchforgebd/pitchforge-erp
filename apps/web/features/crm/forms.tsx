@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 import {
@@ -14,6 +15,7 @@ import {
   CreateOpportunity,
   CreateQuotation,
   CreateSalesActivity,
+  CreateStandardDocument,
   CreateTender,
   ReplacePipelineStages,
   ReplaceTenderChecklist,
@@ -35,11 +37,14 @@ import type {
   Tender,
   TenderChecklistItem,
 } from '@pitchforge/contracts';
-import { Callout } from '@pitchforge/ui';
+import { Button, Callout, DateInput, Dialog, Field, Input } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { FilePicker, uploadFile, useUploadError } from '../common/files.tsx';
 import { DialogButton, FormDialog, dhakaInput } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
+import { errorFor, fieldErrors } from '../common/form-errors.ts';
+import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 import { typed } from '../finance/forms.tsx';
 
@@ -911,5 +916,119 @@ export function NewGuaranteeButton(): ReactNode {
         />
       )}
     </DialogButton>
+  );
+}
+
+/* Standard documents ------------------------------------------------------------------------ */
+
+export function NewStandardDocumentButton(): ReactNode {
+  const t = useTranslations('forms');
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="secondary"
+        onClick={() => {
+          setOpen(true);
+        }}
+      >
+        {t('newStandardDocument')}
+      </Button>
+      {open && (
+        <StandardDocumentDialog
+          onClose={() => {
+            setOpen(false);
+          }}
+        />
+      )}
+    </>
+  );
+}
+
+function StandardDocumentDialog({ onClose }: { readonly onClose: () => void }): ReactNode {
+  const t = useTranslations('forms');
+  const common = useTranslations('common');
+  const uploadError = useUploadError();
+  const [name, setName] = useState('');
+  const [expiresOn, setExpiresOn] = useState<string | null>(null);
+  const [picked, setPicked] = useState<File | null>(null);
+  const [errors, setErrors] = useState<ReadonlyMap<string, string>>(new Map());
+  const save = useCommand(
+    async (file: File) => {
+      const stored = await uploadFile(file, null);
+      const result = CreateStandardDocument.safeParse({
+        name: name.trim(),
+        fileId: stored.id,
+        expiresOn,
+      });
+      if (!result.success) throw new Error(result.error.message);
+      return browserCall(crm.createStandardDocument, { body: result.data });
+    },
+    { success: t('saved'), invalidate: [crm.listStandardDocuments.id], onSuccess: onClose },
+  );
+  return (
+    <Dialog
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      title={t('newStandardDocument')}
+      description={t('standardDocumentHint')}
+      closeLabel={common('close')}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            {common('cancel')}
+          </Button>
+          <Button
+            loading={save.isPending}
+            disabled={picked === null}
+            onClick={() => {
+              const found = fieldErrors(
+                CreateStandardDocument.omit({ fileId: true }).safeParse({
+                  name: name.trim(),
+                  expiresOn,
+                }),
+              );
+              setErrors(found);
+              if (found.size === 0 && picked !== null) save.mutate(picked);
+            }}
+          >
+            {t('save')}
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        {save.isError && <Callout tone="crit" title={uploadError(save.error)} />}
+        <Field
+          label={t('fields.name')}
+          required
+          requiredLabel={common('required')}
+          {...errorFor(errors, 'name')}
+        >
+          {(control) => (
+            <Input
+              {...control}
+              value={name}
+              onChange={(event) => {
+                setName(event.target.value);
+              }}
+            />
+          )}
+        </Field>
+        <Field label={t('fields.expiresOn')}>
+          {(control) => (
+            <DateInput
+              {...control}
+              value={expiresOn}
+              onChange={setExpiresOn}
+              placeholder={t('chooseDate')}
+            />
+          )}
+        </Field>
+        <FilePicker label={t('fields.file')} onPick={setPicked} />
+      </div>
+    </Dialog>
   );
 }

@@ -27,6 +27,7 @@ import type { Tone } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
+import { RecordFiles } from '../common/files.tsx';
 import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Details, RecordTable } from '../common/record-table.tsx';
@@ -136,6 +137,10 @@ function BillDialog({
             )}
           </QueryView>
         )}
+        <RecordFiles
+          record={{ recordType: 'vendor_bill', recordId: bill.id }}
+          canAttach={bill.allowedActions.includes('update')}
+        />
       </div>
     </Dialog>
   );

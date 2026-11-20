@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
 import { ChangePassword, coreEndpoints as core } from '@pitchforge/contracts';
-import { Button, Callout, DataTable, Field, Input, StatusPill } from '@pitchforge/ui';
+import type { NotificationPreferences } from '@pitchforge/contracts';
+import { Button, Callout, Checkbox, DataTable, Field, Input, StatusPill } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
@@ -145,6 +146,40 @@ function PasswordForm(): ReactNode {
   );
 }
 
+function NotificationSettings(): ReactNode {
+  const t = useTranslations('account');
+  const message = useErrorMessage();
+  const preferences = useQuery({
+    queryKey: [core.getNotificationPreferences.id],
+    queryFn: () => browserCall(core.getNotificationPreferences, {}),
+  });
+  const save = useCommand(
+    (body: NotificationPreferences) => browserCall(core.updateNotificationPreferences, { body }),
+    { success: t('preferencesSaved'), invalidate: [core.getNotificationPreferences.id] },
+  );
+  const shown = save.data ?? preferences.data;
+  return (
+    <Card title={t('notifications')} description={t('notificationsDescription')}>
+      <div className="flex flex-col gap-3 p-4">
+        {preferences.isPending && <LoadingState />}
+        {preferences.isError && <ErrorState error={preferences.error} />}
+        {save.isError && <Callout tone="crit" title={message(save.error)} />}
+        {shown !== undefined &&
+          (['email', 'push', 'dailyDigest'] as const).map((channel) => (
+            <Checkbox
+              key={channel}
+              label={t(`channels.${channel}`)}
+              checked={new Map(Object.entries(shown)).get(channel) === true}
+              onCheckedChange={(checked) => {
+                save.mutate({ ...shown, [channel]: checked === true });
+              }}
+            />
+          ))}
+      </div>
+    </Card>
+  );
+}
+
 export function AccountPage(): ReactNode {
   const t = useTranslations('account');
   const session = useSession();
@@ -167,6 +202,7 @@ export function AccountPage(): ReactNode {
           </dl>
         </Card>
         <Sessions />
+        <NotificationSettings />
         <PasswordForm />
       </div>
     </>
