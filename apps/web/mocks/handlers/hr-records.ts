@@ -66,7 +66,7 @@ export const hrRecordHandlers: readonly MockHandler[] = [
       return {
         json: {
           ...body,
-          id: rid(13),
+          id: rid(14),
           userId: null,
           status: 'active',
           leftOn: null,

@@ -30,10 +30,11 @@ const meta = (at: string, by: string = PEOPLE.farhana.id) => ({
 /** Staff without a sign-in of their own in the sample company. */
 export const STAFF = {
   ...PEOPLE,
-  tahmid: { id: rid(9), name: 'Tahmid Karim' },
-  rumana: { id: rid(10), name: 'Rumana Sultana' },
-  shirin: { id: rid(11), name: 'Shirin Akhter' },
-  kamal: { id: rid(12), name: 'Kamal Uddin' },
+  // Same ids as the project team records; rid(9) is Mahin Chowdhury, a freelancer.
+  tahmid: { id: rid(10), name: 'Tahmid Karim' },
+  rumana: { id: rid(11), name: 'Rumana Sultana' },
+  shirin: { id: rid(12), name: 'Shirin Akhter' },
+  kamal: { id: rid(13), name: 'Kamal Uddin' },
 } as const;
 
 const DEPARTMENTS = { eng: rid(1902), del: rid(1903), fin: rid(1904) } as const;

@@ -197,3 +197,42 @@ describe('procurement and assets', () => {
     ).toBe('PERIOD_LOCKED');
   });
 });
+
+describe('sample people', () => {
+  it('one person id means one name in every module', async () => {
+    const names = new Map<string, string>();
+    const clashes: string[] = [];
+    const walk = (value: unknown): void => {
+      if (Array.isArray(value)) {
+        value.forEach(walk);
+        return;
+      }
+      if (typeof value !== 'object' || value === null) return;
+      const record = new Map<string, unknown>(Object.entries(value));
+      const id = record.get('id');
+      const name = record.get('name');
+      if (typeof id === 'string' && typeof name === 'string' && record.size === 2) {
+        const seen = names.get(id);
+        if (seen !== undefined && seen !== name) clashes.push(`${id}: ${seen} / ${name}`);
+        names.set(id, name);
+      }
+      record.forEach(walk);
+    };
+    const projects = await itemsOf(await get('partner', '/projects/projects'));
+    for (const url of [
+      '/hr/employees',
+      '/hr/attendance-records',
+      '/hr/leave-requests',
+      '/payroll/payslips',
+      '/procurement/assets',
+      ...projects.flatMap((project) => [
+        `/projects/projects/${String(project.id)}/team`,
+        `/projects/projects/${String(project.id)}/tasks`,
+      ]),
+    ]) {
+      walk(await (await get('partner', url)).json());
+    }
+    expect(clashes).toEqual([]);
+    expect(names.size).toBeGreaterThan(8);
+  });
+});
