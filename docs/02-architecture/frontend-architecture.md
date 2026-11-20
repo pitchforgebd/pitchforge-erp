@@ -37,19 +37,19 @@ flowchart LR
 
 ## Concerns
 
-| Concern       | Approach                                                                               |
-| ------------- | -------------------------------------------------------------------------------------- |
-| Data fetching | TanStack Query; cache invalidated on mutations                                         |
-| Tables        | TanStack Table with server-side sort, filter, pagination, saved views                  |
-| Forms         | React Hook Form + contract schemas                                                     |
-| Design system | `packages/ui` on shadcn/ui and Tailwind tokens; light and dark                         |
-| Money         | One `<Money>` component: `৳1,25,000`, international option, amount in words            |
-| Permissions   | Render from `allowedActions`; hide routes the role cannot open; never trust the client |
-| Real time     | Server-sent events for notifications and job progress                                  |
-| i18n          | next-intl; English now, Bangla later; no hard-coded strings                            |
-| PWA           | Installable, push notifications, camera capture for receipts                           |
-| Accessibility | Radix primitives, keyboard paths, WCAG 2.1 AA                                          |
-| Quality       | Storybook for every component; Playwright for every critical journey                   |
+| Concern       | Approach                                                                                                                                                                                                                                                                                                                                                        |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Data fetching | TanStack Query; cache invalidated on mutations                                                                                                                                                                                                                                                                                                                  |
+| Tables        | TanStack Table with server-side sort, filter, pagination, saved views                                                                                                                                                                                                                                                                                           |
+| Forms         | Contract schemas validate every body before it is sent. Sign-in and account use React Hook Form; record create and edit screens use `FormDialog` (`features/common/form-dialog.tsx`), which lists the fields, reshapes what people type (amounts, empty values to null) without calculating anything, and validates with the contract's create or update schema |
+| Design system | `packages/ui` on shadcn/ui and Tailwind tokens; light and dark                                                                                                                                                                                                                                                                                                  |
+| Money         | One `<Money>` component: `৳1,25,000`, international option, amount in words                                                                                                                                                                                                                                                                                     |
+| Permissions   | Render from `allowedActions`; hide routes the role cannot open; never trust the client                                                                                                                                                                                                                                                                          |
+| Real time     | Server-sent events for notifications and job progress                                                                                                                                                                                                                                                                                                           |
+| i18n          | next-intl; English now, Bangla later; no hard-coded strings                                                                                                                                                                                                                                                                                                     |
+| PWA           | Installable, push notifications, camera capture for receipts                                                                                                                                                                                                                                                                                                    |
+| Accessibility | Radix primitives, keyboard paths, WCAG 2.1 AA                                                                                                                                                                                                                                                                                                                   |
+| Quality       | Storybook for every component; Playwright for every critical journey                                                                                                                                                                                                                                                                                            |
 
 ## Frontend security rules
 

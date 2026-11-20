@@ -34,6 +34,7 @@ import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { EditBillButton } from './forms.tsx';
 import { PostingLines } from './posting-lines.tsx';
 
 const BILL_TONE: Readonly<Record<VendorBill['status'], Tone>> = {
@@ -90,6 +91,7 @@ function BillDialog({
       closeLabel={common('close')}
       footer={
         <>
+          <EditBillButton bill={bill} />
           {bill.status === 'pending_approval' && (
             <Button asChild variant="secondary">
               <Link href="/approvals">{t('openApproval')}</Link>

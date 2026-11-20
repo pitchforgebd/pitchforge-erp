@@ -12,6 +12,7 @@ import type { BusinessDate } from '@pitchforge/shared-kernel';
 import {
   Button,
   Callout,
+  Checkbox,
   DateInput,
   DateText,
   Dialog,
@@ -38,6 +39,16 @@ import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 import { PostingLines } from '../finance/posting-lines.tsx';
 
+import {
+  CloseYearButton,
+  EditAccountButton,
+  NewAccountButton,
+  NewExchangeRateButton,
+  NewPostingRuleButton,
+  NewTaxCodeButton,
+  NewWithholdingRuleButton,
+} from './forms.tsx';
+
 /** How deep an account sits in the tree, for indenting only. */
 function depthOf(account: Account, byId: ReadonlyMap<string, Account>): number {
   let depth = 0;
@@ -61,7 +72,12 @@ function ChartTab(): ReactNode {
       label={t('chart')}
       list={accounts}
       getRowId={(row) => row.id}
-      toolbar={<p className="text-xs text-muted">{t('chartHint')}</p>}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted">{t('chartHint')}</p>
+          <NewAccountButton />
+        </div>
+      }
       columns={[
         {
           id: 'code',
@@ -93,6 +109,12 @@ function ChartTab(): ReactNode {
           header: t('control'),
           cell: (row) =>
             row.isControl ? <StatusPill tone="info">{t('engineOnly')}</StatusPill> : null,
+        },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <EditAccountButton account={row} />,
         },
       ]}
     />
@@ -287,6 +309,7 @@ function ManualJournalDialog({
   const t = useTranslations('ledger');
   const common = useTranslations('common');
   const message = useErrorMessage();
+  const [editing, setEditing] = useState(false);
   const submit = useCommand(
     () =>
       browserCall(accounting.submitManualJournal, {
@@ -299,6 +322,11 @@ function ManualJournalDialog({
       onSuccess: onClose,
     },
   );
+  if (editing) {
+    return (
+      <NewJournalDialog accounts={[...accounts.values()]} journal={journal} onClose={onClose} />
+    );
+  }
   return (
     <Dialog
       open
@@ -309,16 +337,28 @@ function ManualJournalDialog({
       description={journal.description}
       closeLabel={common('close')}
       footer={
-        journal.allowedActions.includes('submit') ? (
-          <Button
-            loading={submit.isPending}
-            onClick={() => {
-              submit.mutate(undefined);
-            }}
-          >
-            {t('submitForApproval')}
-          </Button>
-        ) : undefined
+        <>
+          {journal.allowedActions.includes('update') && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setEditing(true);
+              }}
+            >
+              {t('editDraft')}
+            </Button>
+          )}
+          {journal.allowedActions.includes('submit') && (
+            <Button
+              loading={submit.isPending}
+              onClick={() => {
+                submit.mutate(undefined);
+              }}
+            >
+              {t('submitForApproval')}
+            </Button>
+          )}
+        </>
       }
     >
       <div className="flex flex-col gap-4">
@@ -364,22 +404,46 @@ interface LineDraft {
 
 const emptyLine = (): LineDraft => ({ accountId: '', description: '', debit: '', credit: '' });
 
+/** "48,000" as typed, from the API's "48000.00"; an empty field for zero. */
+const typedAmount = (amount: string) => (amount === '0.00' ? '' : amount.replace(/.00$/, ''));
+
 function NewJournalDialog({
   accounts,
+  journal,
   onClose,
 }: {
   readonly accounts: readonly Account[];
+  /** A draft to change; without it the dialog makes a new journal. */
+  readonly journal?: ManualJournal;
   readonly onClose: () => void;
 }): ReactNode {
   const t = useTranslations('ledger');
   const common = useTranslations('common');
   const message = useErrorMessage();
-  const [entryDate, setEntryDate] = useState<BusinessDate | null>(todayInDhaka());
-  const [description, setDescription] = useState('');
-  const [lines, setLines] = useState<LineDraft[]>([emptyLine(), emptyLine()]);
+  const [entryDate, setEntryDate] = useState<BusinessDate | null>(
+    journal === undefined ? todayInDhaka() : (journal.entryDate as BusinessDate),
+  );
+  const [description, setDescription] = useState(journal?.description ?? '');
+  const [lines, setLines] = useState<LineDraft[]>(
+    journal === undefined
+      ? [emptyLine(), emptyLine()]
+      : journal.lines.map((line) => ({
+          accountId: line.accountId,
+          description: line.description ?? '',
+          debit: typedAmount(line.debit.amount),
+          credit: typedAmount(line.credit.amount),
+        })),
+  );
   const [errors, setErrors] = useState<ReadonlyMap<string, string>>(new Map());
   const create = useCommand(
-    (body: CreateManualJournal) => browserCall(accounting.createManualJournal, { body }),
+    (body: CreateManualJournal) =>
+      journal === undefined
+        ? browserCall(accounting.createManualJournal, { body })
+        : browserCall(accounting.updateManualJournal, {
+            params: { id: journal.id },
+            body,
+            ifMatch: `"${String(journal.meta.version)}"`,
+          }),
     { success: t('jvSaved'), invalidate: [accounting.listManualJournals.id], onSuccess: onClose },
   );
 
@@ -429,7 +493,7 @@ function NewJournalDialog({
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
-      title={t('newJv')}
+      title={journal === undefined ? t('newJv') : t('editDraft')}
       description={t('newJvDescription')}
       closeLabel={common('close')}
     >
@@ -693,12 +757,22 @@ function ReopenDialog({
 
 function Checklist({ periodId }: { readonly periodId: string }): ReactNode {
   const t = useTranslations('ledger');
+  const message = useErrorMessage();
   const checklist = useQuery({
     queryKey: [accounting.getCloseChecklist.id, periodId],
     queryFn: () => browserCall(accounting.getCloseChecklist, { params: { id: periodId } }),
   });
+  const tick = useCommand(
+    ({ key, done }: { key: string; done: boolean }) =>
+      browserCall(accounting.updateCloseChecklist, {
+        params: { id: periodId },
+        body: { key, done },
+      }),
+    { success: t('checklistSaved'), invalidate: [accounting.getCloseChecklist.id] },
+  );
   return (
     <Card title={t('checklist')} description={t('checklistDescription')}>
+      {tick.isError && <Callout tone="crit" title={message(tick.error)} />}
       <QueryView query={checklist}>
         {(data) => (
           <ul className="flex flex-col gap-2 p-4">
@@ -707,7 +781,13 @@ function Checklist({ periodId }: { readonly periodId: string }): ReactNode {
                 key={item.key}
                 className="flex flex-wrap items-center justify-between gap-2 text-sm"
               >
-                <span>{item.label}</span>
+                <Checkbox
+                  label={item.label}
+                  checked={item.done}
+                  onCheckedChange={(checked) => {
+                    tick.mutate({ key: item.key, done: checked === true });
+                  }}
+                />
                 {item.done ? (
                   <StatusPill tone="good">
                     {t('done', { name: item.doneBy?.name ?? '' })}
@@ -745,6 +825,14 @@ function PeriodsTab(): ReactNode {
         label={t('periods')}
         list={periods}
         getRowId={(row) => row.id}
+        toolbar={
+          // Only Partners may reopen a period, and only they close a year.
+          periods.items.some((period) => period.allowedActions.includes('reopen')) ? (
+            <div className="flex justify-end">
+              <CloseYearButton />
+            </div>
+          ) : undefined
+        }
         columns={[
           {
             id: 'month',
@@ -831,7 +919,12 @@ function SettingsTab(): ReactNode {
         label={t('postingRules')}
         list={rules}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('postingRules')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('postingRules')}</p>
+            <NewPostingRuleButton />
+          </div>
+        }
         columns={[
           { id: 'name', header: t('name'), cell: (row) => row.name },
           { id: 'source', header: t('source'), cell: (row) => <Tag>{row.sourceType}</Tag> },
@@ -843,7 +936,12 @@ function SettingsTab(): ReactNode {
         label={t('taxCodes')}
         list={taxCodes}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('taxCodes')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('taxCodes')}</p>
+            <NewTaxCodeButton />
+          </div>
+        }
         columns={[
           { id: 'code', header: t('code'), cell: (row) => <Tag>{row.code}</Tag> },
           { id: 'name', header: t('name'), cell: (row) => row.name },
@@ -860,7 +958,12 @@ function SettingsTab(): ReactNode {
         label={t('withholdingRules')}
         list={withholding}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('withholdingRules')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('withholdingRules')}</p>
+            <NewWithholdingRuleButton />
+          </div>
+        }
         columns={[
           { id: 'kind', header: t('kind'), cell: (row) => row.kind.toUpperCase() },
           { id: 'category', header: t('category'), cell: (row) => row.category },
@@ -877,7 +980,12 @@ function SettingsTab(): ReactNode {
         label={t('exchangeRates')}
         list={rates}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('exchangeRates')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('exchangeRates')}</p>
+            <NewExchangeRateButton />
+          </div>
+        }
         columns={[
           { id: 'currency', header: t('currency'), cell: (row) => row.currency },
           { id: 'date', header: t('date'), cell: (row) => <DateText value={row.date} /> },

@@ -1,8 +1,10 @@
 import { ALL_ENDPOINTS } from '@pitchforge/contracts';
 import { sampleFor } from '@pitchforge/contracts/fixtures';
 
+import { WRITE_ACCESS } from '../data/write-access.ts';
 import { mock } from '../define.ts';
 import type { MockHandler } from '../define.ts';
+import { bodyOf, steppedUp, viewerOf } from '../serve.ts';
 
 import { accountingRecordHandlers } from './accounting-records.ts';
 import { billingRecordHandlers } from './billing-records.ts';
@@ -31,16 +33,26 @@ const handled = new Set(
 );
 
 /**
- * A fixed sample response for every endpoint with no hand-written handler. It needs a session
- * and returns the same data every time: no calculation and no state, so a mock can never
+ * A fixed sample response for every endpoint with no hand-written handler. It needs a session,
+ * writes need a role from WRITE_ACCESS, and it returns the same data every time: no calculation and no state, so a mock can never
  * become a second implementation of a business rule.
  */
 export const generatedHandlers: readonly MockHandler[] = ALL_ENDPOINTS.filter(
   (endpoint) => !handled.has(endpoint.id),
 ).map((endpoint) =>
-  mock(endpoint, (request) => {
+  mock(endpoint, async (request) => {
     if (endpoint.public !== true && request.cookie(SESSION_COOKIE) === undefined) {
       return { problem: 'UNAUTHENTICATED' };
+    }
+    if (endpoint.method !== 'GET' && endpoint.public !== true) {
+      // Writes are denied by default: only the roles in WRITE_ACCESS, after step-up if asked.
+      const viewer = viewerOf(request);
+      const roles = WRITE_ACCESS.get(endpoint.id) ?? [];
+      if (viewer === undefined || !roles.includes(viewer.role)) return { problem: 'FORBIDDEN' };
+      if (endpoint.stepUp === true && !steppedUp(request)) return { problem: 'STEP_UP_REQUIRED' };
+      if (endpoint.body !== undefined && !endpoint.body.safeParse(await bodyOf(request)).success) {
+        return { problem: 'VALIDATION' };
+      }
     }
     if (endpoint.response === null) return { empty: true };
     return { json: sampleFor(endpoint.response) };

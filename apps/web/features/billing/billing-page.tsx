@@ -40,6 +40,8 @@ import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 import { AgeingTable, StatementTable } from '../finance/party-tables.tsx';
 
+import { EditInvoiceButton, NewCreditNoteButton, NewInvoiceButton } from './forms.tsx';
+
 const INVOICE_TONE: Readonly<Record<SalesInvoice['status'], Tone>> = {
   draft: 'neutral',
   posted: 'info',
@@ -97,6 +99,7 @@ function InvoiceDialog({
       closeLabel={common('close')}
       footer={
         <>
+          <EditInvoiceButton invoice={invoice} />
           {invoice.allowedActions.includes('send_reminder') && (
             <Button
               variant="secondary"
@@ -171,7 +174,12 @@ function InvoicesTab(): ReactNode {
         label={t('invoices')}
         list={invoices}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('invoicesHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('invoicesHint')}</p>
+            <NewInvoiceButton />
+          </div>
+        }
         columns={[
           {
             id: 'number',
@@ -573,7 +581,12 @@ function CreditNotesTab(): ReactNode {
         label={t('creditNotes')}
         list={notes}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('creditNotesHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('creditNotesHint')}</p>
+            <NewCreditNoteButton />
+          </div>
+        }
         columns={[
           { id: 'number', header: t('note'), cell: (row) => <Tag>{row.number ?? t('draft')}</Tag> },
           {

@@ -6,6 +6,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Added
 
+- **Phase 1 sprint F6, finance and billing forms** in `apps/web`: one `FormDialog` for every create and edit screen, validated with the contract schema before sending, and 32 forms built on it across finance, the ledger, billing and partners (see the Phase 1 progress table). Employees file and submit expense claims and ask for advances from `/hr`. 10 new Playwright tests, including axe on the new dialogs.
+
 - **Phase 1 sprint F5, reports and finish** in `apps/web`: `/reports` with the profit and loss (and last year alongside), balance sheet and cash flow, each opening an account's ledger; the trial balance; 18 reports whose columns come from the server, with export; report schedules. The sample statements agree with each other, and a test checks it in poisha. The app installs from a manifest with four shortcuts and keeps no data on the device (ADR-0014, proposed). An accessibility pass checks every section for one heading, axe in light and dark, and 360 px. The Phase 1 sign-off checklist is in `docs/03-development-phases/phase-1-signoff.md`. 22 new Playwright tests.
 
 - **Phase 1 sprint F4, people and procurement** in `apps/web`: `/hr` (self-service check-in, leave and payslips, salary tax declaration; employees, attendance, leave; payroll runs with a start wizard, salary sheet, lock after step-up and bank file; salary structures, loans, final settlements and tax certificates) and `/procurement` (requisitions validated with the contract schema, purchase orders with goods received and amendments, vendors, assets, depreciation, renewals and deposits). Mocks follow the access-control matrix: an employee sees only themself, a manager their team, finance run totals without anyone else's pay. Shared mock helpers `actOn` and `withViewerAsync` check the body against the contract and step-up before answering. 11 new Playwright tests; 15 mock tests, which caught all 9 planted guard bugs.
@@ -80,6 +82,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Security
 
+- Mock writes are denied by default: every write without a hand-written handler needs a role listed in `mocks/data/write-access.ts`, after step-up where the contract asks for it. Before, any signed-in user got a sample answer. A test fails if the table and the endpoints drift apart, and planting a missing role check fails 78 tests.
+- The date picker no longer puts `aria-required` on its button, which axe flagged on the new forms.
 - New restricted field kind `personal-bank` for an employee's own bank account. It had shared the `bank` kind with vendor accounts, so Finance would have received employees' bank details, which the access-control matrix forbids.
 - Every mock reply now drops the restricted fields its viewer may not read, in `mocks/define.ts`, so a handler cannot leak one by forgetting. A record test found the project team handler sending billing rates to project managers before this change.
 

@@ -37,6 +37,18 @@ import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import {
+  AdvanceActions,
+  ChequeStatusButton,
+  EditBankAccountButton,
+  NewAdvanceButton,
+  NewBankAccountButton,
+  NewChequeButton,
+  NewClaimButton,
+  PayClaimButton,
+  SubmitClaimButton,
+} from './forms.tsx';
+
 function TransferDialog({
   fromAccountId,
   onClose,
@@ -175,6 +187,11 @@ export function AccountsTab(): ReactNode {
         label={t('bankAccounts')}
         list={banks}
         getRowId={(row) => row.id}
+        toolbar={
+          <div className="flex justify-end">
+            <NewBankAccountButton />
+          </div>
+        }
         columns={[
           {
             id: 'name',
@@ -211,16 +228,19 @@ export function AccountsTab(): ReactNode {
             header: '',
             align: 'right',
             cell: (row) => (
-              <Button
-                size="sm"
-                variant="secondary"
-                aria-label={t('transferFromLabel', { name: row.name })}
-                onClick={() => {
-                  setFrom(row.id);
-                }}
-              >
-                {t('transfer')}
-              </Button>
+              <span className="flex justify-end gap-2">
+                <EditBankAccountButton bank={row} />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  aria-label={t('transferFromLabel', { name: row.name })}
+                  onClick={() => {
+                    setFrom(row.id);
+                  }}
+                >
+                  {t('transfer')}
+                </Button>
+              </span>
             ),
           },
         ]}
@@ -555,6 +575,11 @@ export function ChequesTab(): ReactNode {
       label={t('cheques')}
       list={cheques}
       getRowId={(row) => row.id}
+      toolbar={
+        <div className="flex justify-end">
+          <NewChequeButton />
+        </div>
+      }
       columns={[
         {
           id: 'no',
@@ -580,6 +605,12 @@ export function ChequesTab(): ReactNode {
           cell: (row) => (
             <StatusPill tone={CHEQUE_TONE[row.status]}>{status(row.status)}</StatusPill>
           ),
+        },
+        {
+          id: 'actions',
+          header: '',
+          align: 'right',
+          cell: (row) => <ChequeStatusButton cheque={row} />,
         },
       ]}
     />
@@ -614,7 +645,15 @@ export function ClaimsTab(): ReactNode {
         label={t('claims')}
         list={claims}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('claims')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('claims')}</p>
+            <span className="flex flex-wrap gap-2">
+              <NewAdvanceButton />
+              <NewClaimButton />
+            </span>
+          </div>
+        }
         columns={[
           {
             id: 'number',
@@ -635,6 +674,17 @@ export function ClaimsTab(): ReactNode {
             header: t('status'),
             cell: (row) => (
               <StatusPill tone={CLAIM_TONE[row.status]}>{claimStatus(row.status)}</StatusPill>
+            ),
+          },
+          {
+            id: 'actions',
+            header: '',
+            align: 'right',
+            cell: (row) => (
+              <span className="flex justify-end gap-2">
+                <SubmitClaimButton claim={row} />
+                <PayClaimButton claim={row} />
+              </span>
             ),
           },
         ]}
@@ -670,6 +720,12 @@ export function ClaimsTab(): ReactNode {
             cell: (row) => (
               <StatusPill tone={ADVANCE_TONE[row.status]}>{advanceStatus(row.status)}</StatusPill>
             ),
+          },
+          {
+            id: 'actions',
+            header: '',
+            align: 'right',
+            cell: (row) => <AdvanceActions advance={row} />,
           },
         ]}
       />

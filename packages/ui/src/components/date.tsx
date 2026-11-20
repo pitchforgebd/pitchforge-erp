@@ -54,9 +54,11 @@ export function DateInput({
   placeholder,
   disabled = false,
   className,
-  ...control
+  ...field
 }: DateInputProps): ReactNode {
   const [open, setOpen] = useState(false);
+  // The trigger is a button, and a button cannot carry aria-required; the label still says it.
+  const { 'aria-required': _required, ...control } = field;
   const selected = value === null ? undefined : toPickerDate(value);
 
   return (

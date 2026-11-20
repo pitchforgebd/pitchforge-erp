@@ -32,6 +32,7 @@ import { LoadingState, QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { EditRunButton } from './forms.tsx';
 import { AgeingTable } from './party-tables.tsx';
 
 const RUN_TONE: Readonly<Record<PaymentRun['status'], Tone>> = {
@@ -83,6 +84,7 @@ function RunDialog({
       closeLabel={common('close')}
       footer={
         <>
+          <EditRunButton run={run} />
           {run.allowedActions.includes('export_advice') && (
             <Button
               variant="secondary"

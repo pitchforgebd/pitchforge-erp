@@ -97,7 +97,13 @@ export const accountingRecordHandlers: readonly MockHandler[] = [
   /* Ledger */
   serveList(
     accounting.listAccounts,
-    financeOnly((viewer) => accountsFor(viewer.role)),
+    // Everyone else sees only the expense accounts a claim can be booked to.
+    (viewer) =>
+      FINANCE_ROLES.has(viewer.role)
+        ? accountsFor(viewer.role)
+        : accountsFor(viewer.role).filter(
+            (account) => account.type === 'expense' && !account.isControl,
+          ),
   ),
   serveOne(
     accounting.getAccount,
@@ -323,9 +329,10 @@ export const accountingRecordHandlers: readonly MockHandler[] = [
   /* Claims and advances: employees see their own. */
   serveList(accounting.listExpenseClaims, (viewer) => claimsFor(viewer.role, viewer.userId)),
   serveOne(accounting.getExpenseClaim, (viewer) => claimsFor(viewer.role, viewer.userId)),
-  serveList(
-    accounting.listEmployeeAdvances,
-    financeOnly((viewer) => advancesFor(viewer.role)),
+  serveList(accounting.listEmployeeAdvances, (viewer) =>
+    FINANCE_ROLES.has(viewer.role)
+      ? advancesFor(viewer.role)
+      : advancesFor(viewer.role).filter((advance) => advance.employee.id === viewer.userId),
   ),
 
   /* Bank */

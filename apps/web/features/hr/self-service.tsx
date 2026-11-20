@@ -31,6 +31,7 @@ import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
+import { ClaimsTab } from '../finance/bank.tsx';
 
 import { LeaveStatusPill, MonthText } from './status.tsx';
 
@@ -482,6 +483,7 @@ export function SelfServiceTab(): ReactNode {
         </div>
       </Card>
       <LeaveRequestsTable label={t('myRequests')} />
+      <ClaimsTab />
       <PayslipsTable />
       <TaxDeclarationCard />
       {drafting && (

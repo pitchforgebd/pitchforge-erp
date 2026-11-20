@@ -32,6 +32,15 @@ import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 import { StatementTable } from '../finance/party-tables.tsx';
 
+import {
+  EditPartnerButton,
+  EditPartnerTransactionButton,
+  NewEquityVersionButton,
+  NewPartnerButton,
+  NewPartnerTransactionButton,
+  ReverseDistributionButton,
+} from './forms.tsx';
+
 function Balance({ value }: { readonly value: Partner['capitalBalance'] }): ReactNode {
   const t = useTranslations('partners');
   // The API leaves a balance out for a role without the field permission.
@@ -93,11 +102,17 @@ function PartnerDialog({
 
 function PartnerCards(): ReactNode {
   const t = useTranslations('partners');
+  const session = useSession();
   const partners = useList(partnersApi.listPartners, {});
   const [open, setOpen] = useState<Partner | null>(null);
   if (partners.status === 'loading') return <LoadingState />;
   return (
     <>
+      {session.permissions.includes('admin.read') && (
+        <div className="flex justify-end">
+          <NewPartnerButton />
+        </div>
+      )}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         {partners.items.map((partner) => (
           <section key={partner.id} className="rounded-card border border-line bg-surface p-4">
@@ -132,6 +147,9 @@ function PartnerCards(): ReactNode {
             >
               {t('withdrawableAndStatement')}
             </Button>
+            <span className="mt-2 block">
+              <EditPartnerButton partner={partner} />
+            </span>
           </section>
         ))}
       </div>
@@ -176,7 +194,12 @@ function Transactions(): ReactNode {
         label={t('transactions')}
         list={transactions}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-xs text-muted">{t('transactionsHint')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted">{t('transactionsHint')}</p>
+            <NewPartnerTransactionButton />
+          </div>
+        }
         columns={[
           {
             id: 'number',
@@ -204,16 +227,21 @@ function Transactions(): ReactNode {
             header: '',
             align: 'right',
             cell: (row) =>
-              row.allowedActions.includes('submit') ? (
-                <Button
-                  size="sm"
-                  loading={submit.isPending && submit.variables.id === row.id}
-                  onClick={() => {
-                    submit.mutate(row);
-                  }}
-                >
-                  {t('submitForApproval')}
-                </Button>
+              row.allowedActions.includes('submit') || row.allowedActions.includes('update') ? (
+                <span className="flex justify-end gap-2">
+                  <EditPartnerTransactionButton transaction={row} />
+                  {row.allowedActions.includes('submit') && (
+                    <Button
+                      size="sm"
+                      loading={submit.isPending && submit.variables.id === row.id}
+                      onClick={() => {
+                        submit.mutate(row);
+                      }}
+                    >
+                      {t('submitForApproval')}
+                    </Button>
+                  )}
+                </span>
               ) : null,
           },
         ]}
@@ -413,6 +441,12 @@ function Distributions(): ReactNode {
             cell: (row) => <Money value={row.distributable} />,
           },
           { id: 'journal', header: t('journal'), cell: (row) => row.journalEntryNo ?? '—' },
+          {
+            id: 'actions',
+            header: '',
+            align: 'right',
+            cell: (row) => <ReverseDistributionButton run={row} />,
+          },
         ]}
       />
       {preview !== null && (
@@ -437,6 +471,7 @@ function Distributions(): ReactNode {
 
 function EquityHistory(): ReactNode {
   const t = useTranslations('partners');
+  const session = useSession();
   const versions = useList(partnersApi.listEquityVersions, {});
   const partners = useList(partnersApi.listPartners, {});
   const nameOf = new Map(partners.items.map((partner) => [partner.id, partner.name]));
@@ -445,7 +480,12 @@ function EquityHistory(): ReactNode {
       label={t('equityHistory')}
       list={versions}
       getRowId={(row) => row.id}
-      toolbar={<p className="text-xs text-muted">{t('equityHint')}</p>}
+      toolbar={
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-xs text-muted">{t('equityHint')}</p>
+          {session.permissions.includes('admin.read') && <NewEquityVersionButton />}
+        </div>
+      }
       columns={[
         {
           id: 'from',

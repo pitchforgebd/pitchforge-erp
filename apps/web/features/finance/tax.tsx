@@ -14,6 +14,8 @@ import { RecordTable } from '../common/record-table.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useList } from '../common/use-list.ts';
 
+import { NewCertificateButton, NewChallanButton } from './forms.tsx';
+
 const MONTHS = ['2026-11', '2026-10', '2026-09', '2026-08', '2026-07'] as const;
 
 function VatReturnCard(): ReactNode {
@@ -71,7 +73,12 @@ export function TaxTab(): ReactNode {
         label={t('certificates')}
         list={certificates}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('certificates')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('certificates')}</p>
+            <NewCertificateButton />
+          </div>
+        }
         columns={[
           {
             id: 'direction',
@@ -112,7 +119,12 @@ export function TaxTab(): ReactNode {
         label={t('challans')}
         list={challans}
         getRowId={(row) => row.id}
-        toolbar={<p className="text-sm font-semibold">{t('challans')}</p>}
+        toolbar={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-semibold">{t('challans')}</p>
+            <NewChallanButton />
+          </div>
+        }
         columns={[
           { id: 'number', header: t('challanNo'), cell: (row) => <Tag>{row.challanNo}</Tag> },
           { id: 'kind', header: t('kind'), cell: (row) => kinds(row.taxKind) },
