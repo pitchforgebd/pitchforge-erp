@@ -24,11 +24,11 @@ import {
 import type { Employee, Shift } from '@pitchforge/contracts';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { nextMonthStart, today } from '../common/dates.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
 import { useList } from '../common/use-list.ts';
 
-const TODAY = '2026-11-20';
 const WEEKDAYS = ['sat', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri'] as const;
 
 /** Drop the fields left empty, so an edit keeps what is stored instead of clearing it. */
@@ -92,7 +92,7 @@ export function NewEmployeeButton(): ReactNode {
           submitLabel={t('save')}
           schema={CreateEmployee}
           fields={fields}
-          initial={{ employmentType: 'probation', joinedOn: TODAY }}
+          initial={{ employmentType: 'probation', joinedOn: today() }}
           submit={(body) => browserCall(hr.createEmployee, { body })}
           success={t('saved')}
           invalidate={[hr.listEmployees.id]}
@@ -205,7 +205,7 @@ export function EmployeeActions({ employee }: { readonly employee: Employee }): 
                 },
                 { name: 'note', label: t('fields.note'), kind: 'textarea', nullable: true },
               ]}
-              initial={{ effectiveOn: TODAY }}
+              initial={{ effectiveOn: today() }}
               submit={(body) =>
                 browserCall(hr.addEmployeeEvent, { params: { id: employee.id }, body })
               }
@@ -383,7 +383,7 @@ export function NewLeaveTypeButton(): ReactNode {
             { name: 'encashable', label: t('fields.encashable'), kind: 'checkbox' },
             { name: 'validFrom', label: t('fields.validFrom'), kind: 'date', required: true },
           ]}
-          initial={{ carryForwardDays: '0', validFrom: '2027-01-01' }}
+          initial={{ carryForwardDays: '0', validFrom: nextMonthStart() }}
           submit={(body) => browserCall(hr.createLeaveTypeVersion, { body })}
           success={t('saved')}
           invalidate={[hr.listLeaveTypes.id]}
@@ -436,7 +436,7 @@ export function NewSalaryStructureButton(): ReactNode {
             },
             { name: 'validFrom', label: t('fields.validFrom'), kind: 'date', required: true },
           ]}
-          initial={{ validFrom: '2026-12-01', allowances: [] }}
+          initial={{ validFrom: nextMonthStart(), allowances: [] }}
           note={t('stepUpNote')}
           submit={(body) => browserCall(pay.createSalaryStructureVersion, { body })}
           success={t('saved')}

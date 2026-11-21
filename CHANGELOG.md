@@ -97,6 +97,8 @@ All notable changes are recorded here. Format: [Keep a Changelog](https://keepac
 
 ### Changed
 
+- Forms and reports start from today in Dhaka and the current fiscal year (`features/common/dates.ts`), not from dates written into the code.
+- Collection actions (new employee, close the year, new equity version …) are offered from capability codes in the session (`useCan`, ADR-0018) instead of guessing a partner from `admin.read`.
 - Transitions and animations are switched off for people who ask for reduced motion. The new dark-mode sweep had caught axe measuring a button halfway through its colour transition.
 - The section placeholder page is gone: every section now has its screens.
 - `.github/CODEOWNERS`: paths now follow the module template (`apps/api/src/modules/<name>/`); owners added for the shared kernel, contracts (two teams) and every guard-rail file.

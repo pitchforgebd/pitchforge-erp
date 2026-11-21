@@ -22,6 +22,7 @@ import {
 } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { currentFiscalYear } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { PdfButton } from '../common/files.tsx';
 import { moneyFromInput } from '../common/money-input.ts';
@@ -35,9 +36,6 @@ import { useList } from '../common/use-list.ts';
 import { ClaimsTab } from '../finance/bank.tsx';
 
 import { LeaveStatusPill, MonthText } from './status.tsx';
-
-/** The current fiscal year (July–June), as the server names it. */
-const FISCAL_YEAR = '2627';
 
 function CheckInCard(): ReactNode {
   const t = useTranslations('hr');
@@ -375,18 +373,20 @@ export function PayslipsTable(): ReactNode {
 }
 
 function TaxDeclarationCard(): ReactNode {
+  // The current fiscal year (July–June), as the server names it: "2627".
+  const fiscalYear = currentFiscalYear().code;
   const t = useTranslations('hr');
   const message = useErrorMessage();
   const declaration = useQuery({
-    queryKey: [pay.getMyTaxDeclaration.id, FISCAL_YEAR],
-    queryFn: () => browserCall(pay.getMyTaxDeclaration, { query: { fiscalYearCode: FISCAL_YEAR } }),
+    queryKey: [pay.getMyTaxDeclaration.id, fiscalYear],
+    queryFn: () => browserCall(pay.getMyTaxDeclaration, { query: { fiscalYearCode: fiscalYear } }),
   });
   const [investments, setInvestments] = useState('');
   const declare = useCommand(
     () =>
       browserCall(pay.submitTaxDeclaration, {
         body: {
-          fiscalYearCode: FISCAL_YEAR,
+          fiscalYearCode: fiscalYear,
           investments: moneyFromInput(investments) ?? { amount: '', currency: 'BDT' },
         },
       }),

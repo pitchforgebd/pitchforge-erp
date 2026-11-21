@@ -23,7 +23,7 @@ import {
 import { browserCall } from '../../lib/api/browser.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { useSession } from '../common/session.tsx';
+import { useCan } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
@@ -288,7 +288,7 @@ function RunDialog({
 export function PayrollRunsTab(): ReactNode {
   const t = useTranslations('payroll');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('payroll.manage');
   const runs = useList(pay.listPayrollRuns, {});
   const structures = useList(pay.listSalaryStructures, {});
   const [open, setOpen] = useState<PayrollRun | null>(null);
@@ -486,7 +486,7 @@ function SettlementDialog({
 export function LoansAndSettlementsTab(): ReactNode {
   const t = useTranslations('payroll');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('payroll.manage');
   const kinds = useTranslations('payroll.loanKinds');
   const message = useErrorMessage();
   const loans = useList(pay.listSalaryLoans, {});

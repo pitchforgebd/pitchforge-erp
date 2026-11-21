@@ -28,3 +28,11 @@ export function useSession(): CurrentSession {
 export function useCanRead(area: string): boolean {
   return useSession().permissions.includes(`${area}.read`);
 }
+
+/**
+ * Whether to offer a collection action such as "New employee" (ADR-0018). Like useCanRead it
+ * only shapes the screen; the API refuses anything the role may not do.
+ */
+export function useCan(capability: string): boolean {
+  return useSession().permissions.includes(capability);
+}

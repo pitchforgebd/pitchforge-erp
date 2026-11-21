@@ -18,5 +18,6 @@ An ADR records one significant decision, the options considered and the conseque
 | [0012](0012-server-builds-of-workspace-packages.md)  | Workspace packages build to `dist` for server images | Accepted | 06 Nov 2026 |
 | [0013](0013-staging-on-cpanel.md)                    | Staging on cPanel shared hosting, mock mode only     | Accepted | 19 Nov 2026 |
 | [0014](0014-installable-app-without-offline-data.md) | Installable app without offline data                 | Proposed | 20 Nov 2026 |
+| [0018](0018-capabilities-for-collection-actions.md)  | Capabilities for collection actions                  | Accepted | 21 Nov 2026 |
 
 New ADR: copy [template.md](template.md) to `NNNN-short-title.md`.

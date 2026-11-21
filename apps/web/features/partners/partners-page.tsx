@@ -108,7 +108,7 @@ function PartnerCards(): ReactNode {
   if (partners.status === 'loading') return <LoadingState />;
   return (
     <>
-      {session.permissions.includes('admin.read') && (
+      {session.permissions.includes('partners.manage') && (
         <div className="flex justify-end">
           <NewPartnerButton />
         </div>
@@ -364,7 +364,7 @@ function Distributions(): ReactNode {
     { onSuccess: setPreview },
   );
   // Only partners run distributions; anyone else sees the history.
-  const canRun = session.permissions.includes('admin.read');
+  const canRun = session.permissions.includes('partners.manage');
   return (
     <div className="flex flex-col gap-3">
       {start.isError && <Callout tone="crit" title={message(start.error)} />}
@@ -483,7 +483,7 @@ function EquityHistory(): ReactNode {
       toolbar={
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted">{t('equityHint')}</p>
-          {session.permissions.includes('admin.read') && <NewEquityVersionButton />}
+          {session.permissions.includes('partners.manage') && <NewEquityVersionButton />}
         </div>
       }
       columns={[

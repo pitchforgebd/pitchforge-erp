@@ -17,6 +17,7 @@ import {
 import type { DistributionRun, Partner, PartnerTransaction } from '@pitchforge/contracts';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { today } from '../common/dates.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
 import { useList } from '../common/use-list.ts';
@@ -169,7 +170,7 @@ export function NewPartnerTransactionButton(): ReactNode {
           submitLabel={t('saveDraft')}
           schema={CreatePartnerTransaction}
           fields={fields}
-          initial={{ date: '2026-11-20' }}
+          initial={{ date: today() }}
           note={t('withdrawableNote')}
           submit={(body) => browserCall(partnersApi.createPartnerTransaction, { body })}
           success={t('saved')}
@@ -249,7 +250,7 @@ export function ReverseDistributionButton({ run }: { readonly run: DistributionR
             { name: 'reversalDate', label: t('fields.date'), kind: 'date', required: true },
             { name: 'reason', label: t('fields.reason'), kind: 'textarea', required: true },
           ]}
-          initial={{ reversalDate: '2026-11-20' }}
+          initial={{ reversalDate: today() }}
           note={t('stepUpNote')}
           submit={(body) =>
             browserCall(partnersApi.reverseDistributionRun, {

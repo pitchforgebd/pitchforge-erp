@@ -17,6 +17,7 @@ import {
 import type { Account } from '@pitchforge/contracts';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { previousFiscalYear } from '../common/dates.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import { useList } from '../common/use-list.ts';
 
@@ -300,10 +301,10 @@ export function CloseYearButton(): ReactNode {
               label: t('fields.fiscalYear'),
               kind: 'select',
               required: true,
-              options: [{ value: '2526', label: '2025–26' }],
+              options: [{ value: previousFiscalYear().code, label: previousFiscalYear().label }],
             },
           ]}
-          initial={{ fiscalYearCode: '2526' }}
+          initial={{ fiscalYearCode: previousFiscalYear().code }}
           note={t('stepUpNote')}
           submit={(body) => browserCall(accounting.closeFiscalYear, { body })}
           success={t('yearClosed')}

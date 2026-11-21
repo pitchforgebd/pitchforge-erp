@@ -21,12 +21,11 @@ import {
 import type { Asset, Licence, PurchaseOrder, Vendor } from '@pitchforge/contracts';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { today } from '../common/dates.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
 import { useList } from '../common/use-list.ts';
 import { typed } from '../finance/forms.tsx';
-
-const TODAY = '2026-11-20';
 
 /** Drop the fields left empty, so an edit keeps what is stored instead of clearing it. */
 const withoutEmpty = (body: Record<string, unknown>) =>
@@ -164,7 +163,7 @@ export function NewOrderButton(): ReactNode {
           submitLabel={t('saveDraft')}
           schema={CreatePurchaseOrder}
           fields={fields}
-          initial={{ date: TODAY }}
+          initial={{ date: today() }}
           note={t('totalsByServer')}
           submit={(body) => browserCall(prc.createPurchaseOrder, { body })}
           success={t('saved')}
@@ -254,7 +253,7 @@ export function NewAssetButton(): ReactNode {
           submitLabel={t('save')}
           schema={CreateAsset}
           fields={fields}
-          initial={{ method: 'straight_line', purchasedOn: TODAY }}
+          initial={{ method: 'straight_line', purchasedOn: today() }}
           submit={(body) => browserCall(prc.createAsset, { body })}
           success={t('saved')}
           invalidate={[prc.listAssets.id]}
@@ -458,7 +457,7 @@ export function NewDepositButton(): ReactNode {
             { name: 'givenOn', label: t('fields.givenOn'), kind: 'date', required: true },
             { name: 'expiresOn', label: t('fields.expiresOn'), kind: 'date', nullable: true },
           ]}
-          initial={{ kind: 'deposit', givenOn: TODAY }}
+          initial={{ kind: 'deposit', givenOn: today() }}
           submit={(body) => browserCall(prc.createDepositGiven, { body })}
           success={t('saved')}
           invalidate={[prc.listDepositsGiven.id]}

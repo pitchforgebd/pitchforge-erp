@@ -32,7 +32,7 @@ import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { useCanRead } from '../common/session.tsx';
+import { useCan, useCanRead } from '../common/session.tsx';
 import { ForbiddenState, QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
@@ -818,6 +818,7 @@ function PeriodsTab(): ReactNode {
     { success: t('locked'), invalidate: [accounting.listFiscalPeriods.id] },
   );
   const firstOpen = periods.items.find((period) => period.status === 'open');
+  const closesYears = useCan('ledger.close');
   return (
     <div className="flex flex-col gap-4">
       {lock.isError && <Callout tone="crit" title={message(lock.error)} />}
@@ -826,8 +827,7 @@ function PeriodsTab(): ReactNode {
         list={periods}
         getRowId={(row) => row.id}
         toolbar={
-          // Only Partners may reopen a period, and only they close a year.
-          periods.items.some((period) => period.allowedActions.includes('reopen')) ? (
+          closesYears ? (
             <div className="flex justify-end">
               <CloseYearButton />
             </div>

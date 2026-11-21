@@ -46,7 +46,7 @@ function ProjectList(): ReactNode {
       list={list}
       getRowId={(row) => row.id}
       empty={t('noProjects')}
-      {...(session.permissions.includes('admin.read') && {
+      {...(session.permissions.includes('projects.create') && {
         toolbar: (
           <div className="flex justify-end">
             <NewProjectButton />

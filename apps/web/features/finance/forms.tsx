@@ -32,6 +32,7 @@ import type {
 import { Button, Callout, Dialog, Field, Select } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { today } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { FilePicker, uploadFile, useUploadError } from '../common/files.tsx';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
@@ -40,8 +41,6 @@ import { useList } from '../common/use-list.ts';
 
 /** "1,25,000" as people type it, from the API's "125000.00". Only the format changes. */
 export const typed = (money: { readonly amount: string }) => money.amount.replace(/\.00$/, '');
-
-const TODAY = '2026-11-20';
 
 function useBankOptions() {
   const banks = useList(accounting.listBankAccounts, {});
@@ -331,7 +330,7 @@ export function PayClaimButton({ claim }: { readonly claim: ExpenseClaim }): Rea
           submitLabel={t('pay')}
           schema={PayDocument}
           fields={fields}
-          initial={{ paymentDate: TODAY }}
+          initial={{ paymentDate: today() }}
           note={t('postedByServer')}
           submit={(body) =>
             browserCall(accounting.payExpenseClaim, {
@@ -399,7 +398,7 @@ export function AdvanceActions({ advance }: { readonly advance: EmployeeAdvance 
               submitLabel={t('pay')}
               schema={PayDocument}
               fields={pay}
-              initial={{ paymentDate: TODAY }}
+              initial={{ paymentDate: today() }}
               submit={(body) =>
                 browserCall(accounting.payEmployeeAdvance, {
                   params: { id: advance.id },

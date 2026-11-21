@@ -25,6 +25,7 @@ import {
 } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { currentFiscalYear, lastClosedMonthEnd, monthStart, yearBefore } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { RecordTable } from '../common/record-table.tsx';
@@ -34,9 +35,8 @@ import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 
-/** The year so far: fiscal year 2026–27 to the last closed month. */
-const FROM = '2026-07-01';
-const TO = '2026-10-31';
+/** The year so far: the current fiscal year up to the last closed month. */
+const yearSoFar = () => ({ from: currentFiscalYear().start, to: lastClosedMonthEnd() });
 
 function LedgerDialog({
   accountId,
@@ -47,12 +47,13 @@ function LedgerDialog({
   readonly label: string;
   readonly onClose: () => void;
 }): ReactNode {
+  const { to } = yearSoFar();
   const t = useTranslations('reports');
   const common = useTranslations('common');
   const ledger = useQuery({
     queryKey: [reporting.getAccountLedger.id, accountId],
     queryFn: () =>
-      browserCall(reporting.getAccountLedger, { query: { accountId, from: '2026-10-01', to: TO } }),
+      browserCall(reporting.getAccountLedger, { query: { accountId, from: monthStart(to), to } }),
   });
   return (
     <Dialog
@@ -61,7 +62,7 @@ function LedgerDialog({
         if (!open) onClose();
       }}
       title={label}
-      description={t('ledgerFor', { from: '2026-10-01', to: TO })}
+      description={t('ledgerFor', { from: monthStart(to), to })}
       closeLabel={common('close')}
     >
       <QueryView query={ledger}>
@@ -201,6 +202,7 @@ function Statement({
 }
 
 function StatementsTab(): ReactNode {
+  const { from, to } = yearSoFar();
   const t = useTranslations('reports');
   const [compare, setCompare] = useState(false);
   const pl = useQuery({
@@ -208,17 +210,17 @@ function StatementsTab(): ReactNode {
     queryFn: () =>
       browserCall(reporting.getProfitAndLoss, {
         query: compare
-          ? { from: FROM, to: TO, compareFrom: '2025-07-01', compareTo: '2025-10-31' }
-          : { from: FROM, to: TO },
+          ? { from, to, compareFrom: yearBefore(from), compareTo: yearBefore(to) }
+          : { from, to },
       }),
   });
   const bs = useQuery({
     queryKey: [reporting.getBalanceSheet.id],
-    queryFn: () => browserCall(reporting.getBalanceSheet, { query: { asOf: TO } }),
+    queryFn: () => browserCall(reporting.getBalanceSheet, { query: { asOf: to } }),
   });
   const cf = useQuery({
     queryKey: [reporting.getCashFlow.id],
-    queryFn: () => browserCall(reporting.getCashFlow, { query: { from: FROM, to: TO } }),
+    queryFn: () => browserCall(reporting.getCashFlow, { query: { from, to } }),
   });
   return (
     <div className="flex flex-col gap-4">
@@ -246,10 +248,11 @@ function StatementsTab(): ReactNode {
 }
 
 function TrialBalanceTab(): ReactNode {
+  const { to } = yearSoFar();
   const t = useTranslations('reports');
   const tb = useQuery({
     queryKey: [reporting.getTrialBalance.id],
-    queryFn: () => browserCall(reporting.getTrialBalance, { query: { asOf: TO } }),
+    queryFn: () => browserCall(reporting.getTrialBalance, { query: { asOf: to } }),
   });
   const [open, setOpen] = useState<{ id: string; label: string } | null>(null);
   return (

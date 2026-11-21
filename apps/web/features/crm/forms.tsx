@@ -40,6 +40,7 @@ import type {
 import { Button, Callout, DateInput, Dialog, Field, Input } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { inDays, today } from '../common/dates.ts';
 import { FilePicker, uploadFile, useUploadError } from '../common/files.tsx';
 import { DialogButton, FormDialog, dhakaInput } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
@@ -47,8 +48,6 @@ import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
 import { typed } from '../finance/forms.tsx';
-
-const TODAY = '2026-11-20';
 
 const textOf = (value: unknown) => (typeof value === 'string' ? value : '');
 
@@ -503,7 +502,7 @@ export function NewQuotationButton(): ReactNode {
           submitLabel={t('saveDraft')}
           schema={CreateQuotation}
           fields={fields}
-          initial={{ date: TODAY, validUntil: '2026-12-20', discountPercent: '0' }}
+          initial={{ date: today(), validUntil: inDays(30), discountPercent: '0' }}
           note={t('totalsByServer')}
           submit={(body) => browserCall(crm.createQuotation, { body })}
           success={t('saved')}
@@ -596,7 +595,7 @@ export function NewContractButton(): ReactNode {
           submitLabel={t('save')}
           schema={CreateContract}
           fields={fields}
-          initial={{ retentionPercent: '0', startDate: TODAY }}
+          initial={{ retentionPercent: '0', startDate: today() }}
           fixed={{ fileIds: [] }}
           submit={(body) => browserCall(crm.createContract, { body })}
           success={t('saved')}
@@ -780,7 +779,7 @@ export function AwardTenderButton({ tender }: { readonly tender: Tender }): Reac
           ]}
           initial={{
             contractValue: tender.ourPrice === null ? '' : typed(tender.ourPrice),
-            startDate: TODAY,
+            startDate: today(),
           }}
           submit={(body) =>
             browserCall(crm.awardTender, {
@@ -908,7 +907,7 @@ export function NewGuaranteeButton(): ReactNode {
             { name: 'issuedOn', label: t('fields.issuedOn'), kind: 'date', required: true },
             { name: 'expiresOn', label: t('fields.expiresOn'), kind: 'date', nullable: true },
           ]}
-          initial={{ kind: 'bid_security', issuedOn: TODAY }}
+          initial={{ kind: 'bid_security', issuedOn: today() }}
           submit={(body) => browserCall(crm.createGuarantee, { body })}
           success={t('saved')}
           invalidate={[crm.listGuarantees.id]}

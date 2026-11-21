@@ -15,6 +15,7 @@ import {
 import type { SalesInvoice } from '@pitchforge/contracts';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { inDays, today } from '../common/dates.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
 import { useList } from '../common/use-list.ts';
@@ -91,7 +92,7 @@ export function NewInvoiceButton(): ReactNode {
           submitLabel={t('saveDraft')}
           schema={CreateSalesInvoice}
           fields={fields}
-          initial={{ kind: 'standard', issueDate: '2026-11-20', dueDate: '2026-12-20' }}
+          initial={{ kind: 'standard', issueDate: today(), dueDate: inDays(30) }}
           fixed={{ source: 'manual', sourceId: null, adjustAdvanceInvoiceIds: [] }}
           note={t('totalsByServer')}
           submit={(body) => browserCall(billing.createInvoice, { body })}
@@ -185,7 +186,7 @@ export function NewCreditNoteButton(): ReactNode {
             { name: 'amount', label: t('fields.amount'), kind: 'money', required: true },
             { name: 'reason', label: t('fields.reason'), kind: 'textarea', required: true },
           ]}
-          initial={{ kind: 'credit_note', date: '2026-11-20' }}
+          initial={{ kind: 'credit_note', date: today() }}
           note={t('approvalNote')}
           submit={(body) => browserCall(billing.createCreditNote, { body })}
           success={t('noteSaved')}

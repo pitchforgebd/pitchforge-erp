@@ -21,13 +21,14 @@ import {
 } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { today } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { PdfButton } from '../common/files.tsx';
 import { errorFor, fieldErrors } from '../common/form-errors.ts';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Card, PageHeader } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { useCanRead, useSession } from '../common/session.tsx';
+import { useCan, useCanRead } from '../common/session.tsx';
 import { ForbiddenState } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { useList } from '../common/use-list.ts';
@@ -285,7 +286,7 @@ function OrderDialog({
       browserCall(prc.createGoodsReceipt, {
         body: {
           purchaseOrderId: order.id,
-          receivedOn: '2026-11-20',
+          receivedOn: today(),
           lines: [{ description: firstLine?.description ?? '', quantity: received.trim() }],
         },
       }),
@@ -390,7 +391,7 @@ function OrderDialog({
 function OrdersTab(): ReactNode {
   const t = useTranslations('procurement');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('procurement.manage');
   const orders = useList(prc.listPurchaseOrders, {});
   const receipts = useList(prc.listGoodsReceipts, {});
   const [open, setOpen] = useState<PurchaseOrder | null>(null);
@@ -477,7 +478,7 @@ function OrdersTab(): ReactNode {
 function VendorsTab(): ReactNode {
   const t = useTranslations('procurement');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('procurement.manage');
   const vendors = useList(prc.listVendors, {});
   return (
     <RecordTable
@@ -522,7 +523,7 @@ function VendorsTab(): ReactNode {
 function AssetsTab(): ReactNode {
   const t = useTranslations('procurement');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('procurement.manage');
   const status = useTranslations('procurement.assetStatus');
   const message = useErrorMessage();
   const assets = useList(prc.listAssets, {});
@@ -691,7 +692,7 @@ function DepreciationTab(): ReactNode {
 function RenewalsTab(): ReactNode {
   const t = useTranslations('procurement');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('procurement.manage');
   const licences = useList(prc.listLicences, {});
   const deposits = useList(prc.listDepositsGiven, {});
   return (

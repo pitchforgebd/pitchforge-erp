@@ -23,11 +23,12 @@ import {
 import type { Tone } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { monthEnd, monthStart, nextMonthStart, today } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { RecordFiles } from '../common/files.tsx';
 import { Card } from '../common/page-header.tsx';
 import { Details, RecordTable } from '../common/record-table.tsx';
-import { useSession } from '../common/session.tsx';
+import { useCan } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
@@ -242,7 +243,7 @@ function EmployeeDialog({
 export function EmployeesTab(): ReactNode {
   const t = useTranslations('hr');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('hr.manage');
   const status = useTranslations('hr.employeeStatus');
   const [q, setQ] = useState('');
   const employees = useList(hr.listEmployees, q.trim() === '' ? {} : { q: q.trim() });
@@ -314,7 +315,7 @@ export function EmployeesTab(): ReactNode {
 export function AttendanceTab(): ReactNode {
   const t = useTranslations('hr');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('hr.manage');
   const day = useTranslations('hr.dayStatus');
   const message = useErrorMessage();
   const records = useList(hr.listAttendance, {});
@@ -448,15 +449,18 @@ export function AttendanceTab(): ReactNode {
 export function LeaveAdminTab(): ReactNode {
   const t = useTranslations('hr');
   // Partners run HR, payroll and purchasing in the sample company.
-  const manages = useSession().permissions.includes('admin.read');
+  const manages = useCan('hr.manage');
   const balances = useList(hr.listLeaveBalances, {});
   const people = useList(hr.listEmployees, {});
   const nameOf = new Map(people.items.map((person) => [person.id, person.name]));
   const types = useList(hr.listLeaveTypes, {});
+  // This month and the next: who is away soon.
+  const calendarFrom = monthStart(today());
+  const calendarTo = monthEnd(nextMonthStart());
   const calendar = useQuery({
-    queryKey: [hr.getLeaveCalendar.id, '2026-11-01', '2026-12-31'],
+    queryKey: [hr.getLeaveCalendar.id, calendarFrom, calendarTo],
     queryFn: () =>
-      browserCall(hr.getLeaveCalendar, { query: { from: '2026-11-01', to: '2026-12-31' } }),
+      browserCall(hr.getLeaveCalendar, { query: { from: calendarFrom, to: calendarTo } }),
   });
   return (
     <div className="flex flex-col gap-4">

@@ -25,10 +25,8 @@ import { useList } from '../common/use-list.ts';
 export function homeDashboardOf(
   permissions: readonly string[],
 ): Exclude<DashboardKind, 'sales' | 'hr'> {
-  if (permissions.includes('admin.read') && permissions.includes('partners.read')) return 'partner';
-  if (permissions.includes('finance.read')) return 'finance';
-  if (permissions.includes('approvals.read')) return 'pm';
-  return 'employee';
+  const order = ['partner', 'finance', 'pm'] as const;
+  return order.find((kind) => permissions.includes(`dashboard.${kind}`)) ?? 'employee';
 }
 
 function Tile({ tile }: { readonly tile: DashboardTile }): ReactNode {

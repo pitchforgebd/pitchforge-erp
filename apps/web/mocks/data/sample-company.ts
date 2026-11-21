@@ -30,12 +30,31 @@ const ALL_AREAS = [
 ];
 const read = (areas: readonly string[]) => areas.map((area) => `${area}.read`);
 
+/**
+ * Collection actions a role may start, beyond reading an area (ADR-0018). Record actions still
+ * come from each record's allowedActions; these only decide whether to offer "New …" and
+ * similar. The API checks every one of them again.
+ */
+const PARTNER_CAPABILITIES = [
+  'admin.manage',
+  'crm.manage',
+  'hr.manage',
+  'ledger.close',
+  'partners.manage',
+  'payroll.manage',
+  'procurement.manage',
+  'projects.create',
+  'dashboard.partner',
+  'dashboard.sales',
+  'dashboard.hr',
+];
+
 export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
   partner: {
     userId: id(2),
     name: 'Farhana Kabir',
     email: 'farhana@pitchforge.example',
-    permissions: read(ALL_AREAS),
+    permissions: [...read(ALL_AREAS), ...PARTNER_CAPABILITIES],
   },
   finance: {
     userId: id(1),
@@ -53,19 +72,19 @@ export const SAMPLE_USERS: Readonly<Record<SampleRole, SampleUser>> = {
       'procurement',
       'reports',
       'audit',
-    ]),
+    ]).concat('dashboard.finance'),
   },
   pm: {
     userId: id(3),
     name: 'Nusrat Jahan',
     email: 'nusrat@pitchforge.example',
-    permissions: read(['approvals', 'projects', 'crm', 'hr', 'procurement']),
+    permissions: [...read(['approvals', 'projects', 'crm', 'hr', 'procurement']), 'dashboard.pm'],
   },
   employee: {
     userId: id(4),
     name: 'Arif Hossain',
     email: 'arif@pitchforge.example',
-    permissions: read(['projects', 'hr', 'procurement']),
+    permissions: [...read(['projects', 'hr', 'procurement']), 'dashboard.employee'],
   },
 };
 

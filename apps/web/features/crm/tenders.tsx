@@ -26,6 +26,7 @@ import { useErrorMessage } from '../common/errors.ts';
 import { RecordFiles } from '../common/files.tsx';
 import { moneyFromInput } from '../common/money-input.ts';
 import { Details, RecordTable } from '../common/record-table.tsx';
+import { useCan } from '../common/session.tsx';
 import { QueryView } from '../common/states.tsx';
 import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
@@ -317,8 +318,7 @@ export function GuaranteesTab(): ReactNode {
   const message = useErrorMessage();
   const guarantees = useList(crm.listGuarantees, {});
   const documents = useList(crm.listStandardDocuments, {});
-  // Only those who may release guarantees run the sales side.
-  const canAdd = guarantees.items.some((row) => row.allowedActions.length > 0);
+  const canAdd = useCan('crm.manage');
   const release = useCommand(
     (guarantee: Guarantee) =>
       browserCall(crm.releaseGuarantee, {

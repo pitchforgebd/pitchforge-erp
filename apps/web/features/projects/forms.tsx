@@ -26,6 +26,7 @@ import type { Project, ProjectBudget, Task, TeamMember, Timesheet } from '@pitch
 import { Button, Callout, Dialog, Field, Textarea } from '@pitchforge/ui';
 
 import { browserCall } from '../../lib/api/browser.ts';
+import { nextWeekStart, today } from '../common/dates.ts';
 import { useErrorMessage } from '../common/errors.ts';
 import { DialogButton, FormDialog } from '../common/form-dialog.tsx';
 import type { FormSpec } from '../common/form-dialog.tsx';
@@ -35,8 +36,6 @@ import { useCommand } from '../common/step-up.tsx';
 import { TimeText } from '../common/time.tsx';
 import { useList } from '../common/use-list.ts';
 import { typed } from '../finance/forms.tsx';
-
-const TODAY = '2026-11-20';
 
 function useUserOptions() {
   const users = useList(core.listUsers, {});
@@ -105,7 +104,7 @@ export function NewProjectButton(): ReactNode {
           submitLabel={t('save')}
           schema={CreateProject}
           fields={fields}
-          initial={{ type: 'fixed_price', startDate: TODAY }}
+          initial={{ type: 'fixed_price', startDate: today() }}
           submit={(body) => browserCall(projects.createProject, { body })}
           success={t('saved')}
           invalidate={[projects.listProjects.id]}
@@ -377,7 +376,7 @@ export function NewFeeAgreementButton({ projectId }: { readonly projectId: strin
             { name: 'startDate', label: t('fields.startDate'), kind: 'date', required: true },
             { name: 'endDate', label: t('fields.endDate'), kind: 'date', nullable: true },
           ]}
-          initial={{ startDate: TODAY }}
+          initial={{ startDate: today() }}
           fixed={{ projectId }}
           submit={(body) => browserCall(projects.createFeeAgreement, { body })}
           success={t('saved')}
@@ -551,7 +550,7 @@ export function NewTimesheetButton(): ReactNode {
           submitLabel={t('saveDraft')}
           schema={CreateTimesheet}
           fields={fields}
-          initial={{ weekStart: '2026-11-21' }}
+          initial={{ weekStart: nextWeekStart() }}
           note={t('hoursByServer')}
           submit={(body) => browserCall(projects.createTimesheet, { body })}
           success={t('saved')}
